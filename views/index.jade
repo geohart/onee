@@ -1,0 +1,25 @@
+extends layout
+
+block scripts
+
+block content
+
+	div(class='text-center')
+		h1 Welcome to ONEE!
+
+		h4 ONEE helps women help women: have your girlfriend's back without intruding.
+
+	div(id='noconnections')
+		a(class='btn btn-block btn-primary', href='/connect') New Connection
+	
+	div(id='existingconnection')
+		div
+			p You're connected with #{name}
+		div
+			a(class='btn btn-primary', href='/connection/#{connection}') View Connection
+			a(class='btn btn-primary', href='/connect') New Connection
+	
+	div(id='oneestatus', class='well')
+		h4 Bracelet Status
+		p #[img(src='/images/glyphicons-226-bluetooth.png')] Connected via BlueTooth
+		p #[img(src='/images/glyphicons-767-battery-75.png')] 6 hours and 23 minutes remaining

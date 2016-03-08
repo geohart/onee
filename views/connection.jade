@@ -1,0 +1,30 @@
+extends layout
+
+block scripts
+
+block content
+
+	div(class='text-center')
+		h1 Welcome to ONEE!
+
+		h4 ONEE helps women help women: have your girlfriend's back without intruding.
+
+	div(id='connection')
+		p
+			a(class='btn btn-primary', href='') Share your location
+		p
+			a(class='btn btn-primary', href='') Stop sharing your location
+		p
+			a(class='btn btn-primary btn-block', href='/map/#{buddyid}') View #{buddy} on a map
+		p
+			a(class='btn btn-danger btn-block', href='') Disconnect
+	
+	div(id='actions')
+		p
+			a(class='btn btn-primary', href='') Check In
+		p
+			a(class='btn btn-primary', href='') Help
+		p
+			a(class='btn btn-primary', href='') I'm fine
+		p
+			a(class='btn btn-primary', href='') I'm coming
