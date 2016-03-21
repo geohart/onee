@@ -1,56 +1,49 @@
 var express = require('express');
 var router = express.Router();
+var model  = require('./model');
+var passport = require('passport');
+var functions = require('./functions');
+
+
+/*********** Get Views ***********/
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', functions.ensureAuthenticated, function(req, res) {
   res.render('index', { title: 'ONEE' });
 });
 
 /* GET signin page */
-router.get('/signin', function(req, res, next) {
+router.get('/signin', function(req, res) {
   res.render('signin', { title: 'ONEE - Sign in please' });
 });
 
 /* GET signup page */
-router.get('/signup', function(req, res, next) {
+router.get('/signup', function(req, res) {
   res.render('signup', { title: 'ONEE - Sign Up!' });
 });
 
 /* GET connect page */
-router.get('/connect', function(req, res, next) {
+router.get('/connect', functions.ensureAuthenticated, function(req, res) {
   res.render('connect', { title: 'ONEE - Connect with a friend' });
 });
 
 /* GET connection page */
-router.get('/connection', function(req, res, next) {
+router.get('/connection', functions.ensureAuthenticated, function(req, res) {
   res.render('connection', { title: 'ONEE - You\'re connected' });
 });
 
+
+/*********** View Functionality ***********/
+
+/* GET users for autocomplete */
+router.get('/find/users', functions.ensureAuthenticated, function(req, res, next){
+	// TODO
+});
+
+/* GET historical connections */
+router.get('/find/connections', functions.ensureAuthenticated, function(req, res, next){
+	// TODO
+});
+
+
 module.exports = router;
-
-/* key tasks
-
-create an account
-update account
-delete account
-upload photo
-delete photo
-update onee paired with account
-
-create a connection
-destroy a connection
-send message
-respond to message
-query status
-update status
-request assistance
-acknowledge request
-update location
-set location sharing
-get history
-add friend
-delete friend
-get friends
-get partner's status
-
-*/
