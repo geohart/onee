@@ -2,7 +2,11 @@ var express = require('express');
 var router = express.Router();
 var model  = require('./model');
 var passport = require('passport');
-var functions = require('./functions');
+//var functions = require('./functions');
+var auth = require ('./auth');
+
+/* setup authentication for all methods in this router */
+router.use('/secure', auth.isAuthenticated);
 
 /* POST create account */
 router.post('/create', function(req, res, next) {
@@ -39,7 +43,7 @@ router.post('/signin', passport.authenticate('local', { failureRedirect: '/signi
 });
 
 /* POST update to account */
-router.post('/update', function(req, res, next){ 
+router.post('/secure/update', function(req, res, next){ 
 	// TODO
 });
 
@@ -49,38 +53,49 @@ router.post('/password/reset', function(req, res, next){
 });
 
 /* POST change password */
-router.post('/password/change', function(req, res, next){ 
+router.post('/secure/password/change', function(req, res, next){ 
 	// TODO
 });
 
 /* POST upload photo */
-router.post('/photo/upload', function(req, res, next){ 
+router.post('/secure/photo/upload', function(req, res, next){ 
 	// TODO
 });
 
 /* POST delete photo */
-router.post('/photo/delete', function(req, res, next){ 
+router.post('/secure/photo/delete', function(req, res, next){ 
 	// TODO
 });
 
 /* POST pair ONEE with account */
-router.post('/onee/pair', function(req, res, next){ 
+router.post('/secure/onee/pair', function(req, res, next){ 
 	// TODO
 });
 
 /* POST unpair ONEE with account */
-router.post('/onee/unpair', function(req, res, next){ 
+router.post('/secure/onee/unpair', function(req, res, next){ 
 	// TODO
 });
 
 /* POST location sharing preference */
-router.post('/location/sharing', function(req, res, next){ 
+router.post('/secure/location/sharing', function(req, res, next){ 
 	// TODO
 });
 
 /* POST current location */
-router.post('/location/update', function(req, res, next){ 
+router.post('/secure/location/update', function(req, res, next){ 
 	// TODO
 });
+
+/* GET historical connections */
+router.get('/secure/connections/recent', function(req, res, next){
+	// TODO
+});
+
+/* GET users for autocomplete */
+router.get('/secure/users/find', function(req, res, next){
+	// TODO
+});
+
 
 module.exports = router;

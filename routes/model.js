@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var passportLocalMongoose = require('passport-local-mongoose');
+var bcrypt = require('bcrypt-nodejs');
 
 // connect to database
 mongoose.connect('mongodb://localhost/onee');
@@ -14,23 +15,23 @@ db.on('error', console.error.bind(console, 'connection error:'));
 // handle successful connection
 db.once('open', function() {
 	
-  // define schemas and compile into models:
-  
-  // position
-  var positionSchema = new mongoose.Schema();
-  positionSchema.add({
-	    time: Number
+	// define schemas and compile into models:
+
+	// position
+	var positionSchema = new mongoose.Schema();
+	positionSchema.add({
+		time: Number
 	  , lat: Number
 	  , lon: Number
-  });
-  var Position = mongoose.model('position', positionSchema);
+	});
+	var Position = mongoose.model('position', positionSchema);
   
-  // user
-  var userSchema = new mongoose.Schema();
-  userSchema.add({
-	    password: String
+	// user
+	var userSchema = new mongoose.Schema();
+	userSchema.add({
+		password: {type: String, required: true }
 	  , name: String
-	  , email: String
+	  , email: {type: String, unique: true, required: true }
 	  , phone: String
 	  , photo: String
 	  , braceletId: String
@@ -38,39 +39,62 @@ db.once('open', function() {
 	  , shareLocation: Number
 	  , history: [String]
 	  , status: Number
-  });
-  userSchema.methods.validPassword = function( pwd ) {
-	  return ( this.password === pwd );
-  };
-  var User = mongoose.model('user', userSchema);
-  //User.plugin(passportLocalMongoose); // add authentication plugin
-  
-  // message
-  var messageSchema = new mongoose.Schema();
-  messageSchema.add({
-	    type: Number
+	});
+	userSchema.pre('save', function(callback) {
+		
+		var user = this;
+
+		// Break out if the password hasn't changed
+		if (!user.isModified('password')) return callback();
+		
+		// Password changed so we need to hash it
+		bcrypt.genSalt(5, function(err, salt) {
+			if (err) return callback(err);
+
+			bcrypt.hash(user.password, salt, null, function(err, hash) {
+				if (err) return callback(err);
+
+				user.password = hash;
+				callback();
+			});
+		});
+		
+	});
+	userSchema.methods.verifyPassword = function(password, callback) {
+		bcrypt.compare(password, this.password, function(err, isMatch) {
+			if (err) return callback(err);
+			callback(null, isMatch);
+		});
+	};
+	var User = mongoose.model('user', userSchema);
+	//User.plugin(passportLocalMongoose); // add authentication plugin
+
+	// message
+	var messageSchema = new mongoose.Schema();
+	messageSchema.add({
+		type: Number
 	  , sent: Number
 	  , received: Number
 	  , origin: Number
 	  , destin: Number
-  });
-  var Message = mongoose.model('message', messageSchema);
-  
-  // connection
-  var connectionSchema = new mongoose.Schema();
-  connectionSchema.add({
-	    users: [String]
+	});
+	var Message = mongoose.model('message', messageSchema);
+
+	// connection
+	var connectionSchema = new mongoose.Schema();
+	connectionSchema.add({
+		users: [String]
 	  , created: Number
 	  , ended: Number
 	  , history: [messageSchema]
-  });
-  var Connection = mongoose.model('connection', connectionSchema);
-  
-  exports.User = User;
-  exports.Connection = Connection;
-  exports.Message = Message;
-  exports.Position = Position;
-  
+	});
+	var Connection = mongoose.model('connection', connectionSchema);
+
+	exports.User = User;
+	exports.Connection = Connection;
+	exports.Message = Message;
+	exports.Position = Position;
+
 });
 
 exports.db = db;

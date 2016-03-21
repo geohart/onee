@@ -9,12 +9,13 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
 // setup paths to custom-defined routes/endpoints
+var auth			= require('./routes/auth');
 var index			= require('./routes/index');
 var users			= require('./routes/users');
 var model			= require('./routes/model');
 var account		= require('./routes/account');
 var connection	= require('./routes/connection')
-var functions		= require('./routes/functions');
+//var functions		= require('./routes/functions');
 
 var app = express();
 
@@ -75,6 +76,7 @@ app.use(function(err, req, res, next) {
   });
 });
 
+/*
 // authentication with passport
 passport.use(new LocalStrategy({
 		usernameField: 'email',
@@ -103,6 +105,6 @@ passport.deserializeUser(function(id, done) {
   model.User.findById(id, function(err, user) {
     done(err, user);
   });
-});
+});*/
 
 module.exports = app;
