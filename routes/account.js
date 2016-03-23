@@ -125,6 +125,48 @@ router.post('/update', function(req, res, next){
 	}
 });
 
+/* POST delete account */
+router.post('/delete', function(req, res, next){
+	// check for required request parameters
+	if(req.body.email){	
+
+		// find user
+		model.User.findOne({ username: req.body.email }, function (err, user) {
+
+			if (err) { return next(err); }
+			
+			// check to see if user exists
+			if(!user) {
+				res.status(400).send('no user found');
+			} else {
+				// end open connection if one exists
+				model.Connection.
+					findOne({ $or: [ { 'creator' : req.body.email }, { 'buddy' : req.body.email } ]	}).
+					where('ended').equals(null).
+					exec(function(err, conn){
+						if (err) return next(err);
+
+						if(conn){
+							conn.ended = Date.now();
+							conn.save(function(err, conn){
+								if (err) return next(err);
+								// delete user account
+								user.remove();
+								res.status(200).send('user account deleted successfully');
+							});
+						} else {
+							// delete user account
+							user.remove();
+							res.status(200).send('user account deleted successfully');
+						}
+				});
+			}
+		});
+	} else {
+		res.status(400).send('check your request parameters');
+	}	
+});
+
 /* POST reset password */
 router.post('/password/reset', function(req, res, next){ 
 	// TODO
@@ -271,7 +313,7 @@ router.post('/location/update', function(req, res, next){
 					  lat: req.body.lat
 					, lon: req.body.lon
 					, time: Date.now()
-				})
+				});
 
 				// save updated user
 				user.save(function(err, user){
@@ -323,7 +365,7 @@ router.get('/connections/recent', function(req, res, next){
 
 /* GET users for autocomplete */
 router.get('/users/find', function(req, res, next){
-	// check for required request parameters
+	/*// check for required request parameters
 	if(req.query.search.length >= 3){
 		// TODO fix this
 		model.User.find({
@@ -336,7 +378,7 @@ router.get('/users/find', function(req, res, next){
 	
 	}else {
 		res.status(400).send('check your query parameters');
-	}
+	}*/
 });
 
 module.exports = router;

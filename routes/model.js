@@ -83,9 +83,17 @@ db.once('open', function() {
 	// connection
 	var connectionSchema = new mongoose.Schema();
 	connectionSchema.add({
-		users: [String]
+		creator: String
+	  , buddy: String
 	  , created: Number
+	  , accepted: Number
 	  , ended: Number
+	  , creator_safe: Number
+	  , buddy_safe: Number
+	  , creator_inquire: Number
+	  , buddy_inquire: Number
+	  , creator_acknowledge: Number
+	  , buddy_acknowledge: Number
 	  , history: [messageSchema]
 	});
 	var Connection = mongoose.model('connection', connectionSchema);
