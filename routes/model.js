@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
-var passportLocalMongoose = require('passport-local-mongoose');
+//var passportLocalMongoose = require('passport-local-mongoose');
 var bcrypt = require('bcrypt-nodejs');
 
 // connect to database
