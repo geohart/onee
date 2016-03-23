@@ -4,18 +4,12 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var flash = require('connect-flash');
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+//var flash = require('connect-flash');
+//var passport = require('passport');
+//var BasicStrategy = require('passport-http').BasicStrategy;
 
-// setup paths to custom-defined routes/endpoints
-var auth			= require('./routes/auth');
-var index			= require('./routes/index');
-var users			= require('./routes/users');
-var model			= require('./routes/model');
-var account		= require('./routes/account');
-var connection	= require('./routes/connection')
-//var functions		= require('./routes/functions');
+// setup custom-defined routes/endpoints
+var routes	= require('./routes/index');
 
 var app = express();
 
@@ -30,20 +24,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static('public'));
-app.use(require('express-session')({
-    secret: 'oneeisformee',
-    resave: false,
-    saveUninitialized: false
-}));
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
+//app.use(passport.initialize());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-app.use('/account', account); // setup pathways for account-related actions (see account.js for details)
-app.use('/connection', connection); // setup pathways for connection-related actions (see connection.js for details)
-app.use('/users', users);
+app.use(require('./routes')); // setup pathways to routes
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -76,35 +60,16 @@ app.use(function(err, req, res, next) {
   });
 });
 
-/*
-// authentication with passport
-passport.use(new LocalStrategy({
-		usernameField: 'email',
-		passwordField: 'pwd'
-	},
-	function(email, password, done) {
-		model.User.findOne({ email: email }, function(err, user) {
-			console.log(user);
-			if (err) { return done(err); }
-			if (!user) {
-				return done(null, false, { message: 'Incorrect email address.' });
-			}
-			if (!user.validPassword(password)) {
-				return done(null, false, { message: 'Incorrect password.' });
-			}
-			return done(null, user);
-		});
-	}
-));
-
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-  model.User.findById(id, function(err, user) {
-    done(err, user);
-  });
-});*/
+/* AUTHENTICATION WITH PASSPORT */
+/*passport.use(new BasicStrategy(
+  function(username, password, done) {
+    model.User.findOne({ username: username }, function (err, user) {
+      if (err) { return done(err); }
+      if (!user) { return done(null, false); }
+      if (!user.validPassword(password)) { return done(null, false); }
+      return done(null, user);
+    });
+  }
+));*/
 
 module.exports = app;

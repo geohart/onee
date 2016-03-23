@@ -1,16 +1,17 @@
-var express = require('express');
+var express 	= require('express');
+var passport  = require('passport');
+var model  	= require('./model');
+var auth 		= require('./auth');
+
+// declare instance of express router
 var router = express.Router();
-var model  = require('./model');
-//var passport = require('passport');
-//var functions = require('./functions');
-var auth = require('./auth');
 
 /* setup authentication for all methods in this router */
-router.use(auth.isAuthenticated);
+//router.use(auth.isAuthenticated);
 
 /* POST create a new connection */
 router.post('/create', function(req, res, next){ 
-	// TODO
+	res.send('it worked');
 });
 
 /* POST end a connection */

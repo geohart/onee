@@ -29,13 +29,13 @@ db.once('open', function() {
 	// user
 	var userSchema = new mongoose.Schema();
 	userSchema.add({
-		password: {type: String, required: true }
+	    username: String
+	  , password: String
 	  , name: String
-	  , email: {type: String, unique: true, required: true }
 	  , phone: String
 	  , photo: String
 	  , braceletId: String
-	  , location: [positionSchema]
+	  , location: positionSchema
 	  , shareLocation: Number
 	  , history: [String]
 	  , status: Number
@@ -75,8 +75,8 @@ db.once('open', function() {
 		type: Number
 	  , sent: Number
 	  , received: Number
-	  , origin: Number
-	  , destin: Number
+	  , originUser: String
+	  , destinUser: String
 	});
 	var Message = mongoose.model('message', messageSchema);
 

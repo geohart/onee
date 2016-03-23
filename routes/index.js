@@ -1,9 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var model  = require('./model');
-var passport = require('passport');
-var functions = require('./functions');
+var express 		= require('express');
+var passport 		= require('passport');
+var router 			= express.Router();
 
+/*********** Setup Other Routes ***********/
+
+router.use('/account', require('./account')); // setup pathways for account-related actions (see account.js for details)
+router.use('/connection', require('./connection')); // setup pathways for connection-related actions (see connection.js for details)
 
 /*********** Get Views ***********/
 
@@ -28,7 +30,7 @@ router.get('/connect', function(req, res) {
 });
 
 /* GET connection page */
-router.get('/connection', function(req, res) {
+router.get('/view', function(req, res) {
   res.render('connection', { title: 'ONEE - You\'re connected' });
 });
 
