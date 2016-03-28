@@ -1,24 +1,20 @@
-var express 	= require('express');
-//var passport  = require('passport');
-//var BasicStrategy = require('passport-http').BasicStrategy;
-var model  	= require('./model');
+var express	= require('express');
+var config		= require('../config');   
+var model		= require('./model');
+var auth        = require('./auth');
 
 // declare instance of express router
 var router = express.Router();
 
-/* setup authentication for all methods in this router */
-//router.use('/secure', passport.authenticate('basic', { session: false }));
+// apply security measures to protected endpoints
+router.use('/secure', auth.checkToken);
 
-//router.get('/', passport.authenticate('basic', { session: false }), function(req, res, next){
-//	res.send('hi there');
-//});
-
-router.post('/test', function(req, res, next){
+/*router.post('/test', function(req, res, next){
 	console.log('query:');
 	console.log(req.query);
 	console.log('body:');
 	console.log(req.body);
-	res.status(200).send('test done');
+	res.status(200).json(req.user).send('test done');
 });
 
 router.get('/test', function(req, res, next){
@@ -28,6 +24,10 @@ router.get('/test', function(req, res, next){
 	console.log(req.body);
 	res.status(200).send('test done');
 });
+
+router.get('/secure/test', function(req, res, next){
+	res.status(200).send('hello!')
+});*/
 
 /* POST create account */
 router.post('/create', function(req, res, next) {
@@ -69,13 +69,8 @@ router.post('/create', function(req, res, next) {
 	}
 });
 
-/* POST sign in to account */
-router.post('/signin', function(req, res, next){
-	// TODO
-});
-
 /* POST update to account */
-router.post('/update', function(req, res, next){ 
+router.post('/secure/update', function(req, res, next){ 
 
 	// check for required request parameters
 	if(req.body.email){	
@@ -126,7 +121,7 @@ router.post('/update', function(req, res, next){
 });
 
 /* POST delete account */
-router.post('/delete', function(req, res, next){
+router.post('/secure/delete', function(req, res, next){
 	// check for required request parameters
 	if(req.body.email){	
 
@@ -173,22 +168,22 @@ router.post('/password/reset', function(req, res, next){
 });
 
 /* POST change password */
-router.post('/password/change', function(req, res, next){ 
+router.post('/secure/password/change', function(req, res, next){ 
 	// TODO
 });
 
 /* POST upload photo */
-router.post('/photo/upload', function(req, res, next){ 
+router.post('/secure/photo/upload', function(req, res, next){ 
 	// TODO
 });
 
 /* POST delete photo */
-router.post('/photo/delete', function(req, res, next){ 
+router.post('/secure/photo/delete', function(req, res, next){ 
 	// TODO
 });
 
 /* POST pair ONEE with account */
-router.post('/onee/pair', function(req, res, next){
+router.post('/secure/onee/pair', function(req, res, next){
 
 	// check for required request parameters
 	if(req.body.email && req.body.braceletId){	
@@ -221,7 +216,7 @@ router.post('/onee/pair', function(req, res, next){
 });
 
 /* POST unpair ONEE with account */
-router.post('/onee/unpair', function(req, res, next){ 
+router.post('/secure/onee/unpair', function(req, res, next){ 
 	
 	// check for required request parameters
 	if(req.body.email){	
@@ -254,7 +249,7 @@ router.post('/onee/unpair', function(req, res, next){
 });
 
 /* POST location sharing preference */
-router.post('/location/sharing', function(req, res, next){ 
+router.post('/secure/location/sharing', function(req, res, next){ 
 	
 	// check for required request parameters
 	if(req.body.email && req.body.shareLocation){	
@@ -291,7 +286,7 @@ router.post('/location/sharing', function(req, res, next){
 });
 
 /* POST current location */
-router.post('/location/update', function(req, res, next){ 
+router.post('/secure/location/update', function(req, res, next){ 
 	
 	// check for required request parameters
 	if(req.body.email && req.body.lat && req.body.lon){	
@@ -330,7 +325,7 @@ router.post('/location/update', function(req, res, next){
 });
 
 /* GET historical connections */
-router.get('/connections/recent', function(req, res, next){
+router.get('/secure/connections/recent', function(req, res, next){
 	
 	// check for required request parameters
 	if(req.query.email){	
@@ -364,7 +359,7 @@ router.get('/connections/recent', function(req, res, next){
 });
 
 /* GET users for autocomplete */
-router.get('/users/find', function(req, res, next){
+router.get('/secure/users/find', function(req, res, next){
 	/*// check for required request parameters
 	if(req.query.search.length >= 3){
 		// TODO fix this

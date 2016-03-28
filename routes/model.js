@@ -1,10 +1,10 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
-//var passportLocalMongoose = require('passport-local-mongoose');
+var config		= require('../config');  
 var bcrypt = require('bcrypt-nodejs');
 
 // connect to database
-mongoose.connect('mongodb://localhost/onee');
+mongoose.connect(config.database);
 
 // setup a database reference variable
 var db = mongoose.connection;
@@ -67,7 +67,6 @@ db.once('open', function() {
 		});
 	};
 	var User = mongoose.model('user', userSchema);
-	//User.plugin(passportLocalMongoose); // add authentication plugin
 
 	// message
 	var messageSchema = new mongoose.Schema();

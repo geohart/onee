@@ -1,13 +1,13 @@
 var express 	= require('express');
-//var passport  = require('passport');
-var model  	= require('./model');
-//var auth 		= require('./auth');
+var config		= require('../config');   
+var model		= require('./model');
+var auth        = require('./auth');
 
 // declare instance of express router
 var router = express.Router();
 
-/* setup authentication for all methods in this router */
-//router.use(auth.isAuthenticated);
+// apply security measures to all endpoints
+router.use(auth.checkToken);
 
 /* POST create a new connection */
 router.post('/create', function(req, res, next){ 
