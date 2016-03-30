@@ -9,38 +9,46 @@ var router = express.Router();
 
 // route to authenticate a user
 router.post('/authenticate', function(req, res, next) {
+	
+	// check for required request parameters
+	if(req.body.email && req.body.password){	
 
-	// find the user
-	model.User.findOne({ username: req.body.email }, function(err, user) {
-		if (err) throw err;
+		// find the user
+		model.User.findOne({ username: req.body.email }, function(err, user) {
+			if (err) throw err;
 
-		if (!user) {
-			res.status(401).json({ success: false, message: 'Authentication failed. User not found.' });
-		} else if (user) {
+			if (!user) {
+				res.status(401).json({ success: false, message: 'Authentication failed. User not found.' });
+			} else if (user) {
 
-			// check if password matches
-			user.verifyPassword(req.body.password, function(err, isMatch) {
-				if (err) { return next(err); }
-				
-				if (!isMatch) {
-					res.json({ success: false, message: 'Authentication failed. Wrong password.' });
-				} else {
+				// check if password matches
+				user.verifyPassword(req.body.password, function(err, isMatch) {
+					if (err) { return next(err); }
+					
+					if (!isMatch) {
+						res.json({ success: false, message: 'Authentication failed. Wrong password.' });
+					} else {
 
-					// if user is found and password is right - create a token
-					var token = jwt.sign(user, config.secret, {
-						expiresIn: 86400 // expires in 24 hours
-					});
+						// if user is found and password is right - create a token
+						var token = jwt.sign(user, config.secret, {
+							expiresIn: 86400 // expires in 24 hours
+						});
 
-					// return the information including token as JSON
-					res.json({
-						success: true,
-						message: 'Enjoy your token!',
-						token: token
-					});
-				}
-			});
-		}
-	});
+						// return the information including token as JSON
+						res.json({
+							success: true,
+							message: 'Enjoy your token!',
+							token: token
+						});
+					}
+				});
+			}
+		});
+		
+	} else {
+		res.status(400).send('check your request parameters');
+	}
+	
 });
 
 // function to check for token
