@@ -459,9 +459,9 @@ router.get('/secure/connections/recent', function(req, res, next){
 						model.User.find({ username: { $in: unq_emails } }).
 							select({ name: 1, username: 1, phone: 1, photo: 1 }).
 							exec(function(err, users){
-							if (err) { return next(err); }
-							res.status(200).send({ 'message' : 'success', 'history': users });
-						});					
+								if (err) { return next(err); }
+								res.status(200).send({ 'message' : 'success', 'history': users });
+							});					
 					});
 			}
 		});
@@ -473,20 +473,26 @@ router.get('/secure/connections/recent', function(req, res, next){
 
 /* GET users for autocomplete */
 router.get('/secure/users/find', function(req, res, next){
-	/*// check for required request parameters
+	// check for required request parameters
 	if(req.query.search.length >= 3){
-		// TODO fix this
-		model.User.find({
-			$or: [{ 'username' : {$regex: req.query.search }, { 'name' : req.query.search }]
-		}, function(err, users){
-			if (err) { return next(err); }
-			
-			res.status(200).send(users);
-		}
-	
+		// create regex
+		var pattern = new RegExp('.*(' + req.query.search + ').*');
+		
+		console.log(pattern);
+
+		// search username and name fields
+		model.User.find({ $or: [{ 'username' : {$regex: pattern, $options: 'i'}}, { 'name' : {$regex: pattern, $options: 'i' }}] }).
+			limit(10).
+			sort({ username: 1 }).
+			select({ name: 1, username: 1, phone: 1, photo: 1 }).
+			exec(function(err, users){
+				if (err) { return next(err); }
+				res.status(200).send({ 'message' : 'success', 'results': users });
+			});
+
 	}else {
 		res.status(400).send('check your query parameters');
-	}*/
+	}
 });
 
 module.exports = router;
