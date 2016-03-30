@@ -2,6 +2,7 @@ var express	= require('express');
 var config		= require('../config');   
 var model		= require('./model');
 var auth        = require('./auth');
+var func			= require('./functions');
 
 // declare instance of express router
 var router = express.Router();
@@ -163,13 +164,102 @@ router.post('/secure/delete', function(req, res, next){
 });
 
 /* POST reset password */
-router.post('/password/reset', function(req, res, next){ 
-	// TODO
+router.post('/password/reset', function(req, res, next){
+
+	// check for required request parameters
+	if(req.body.email){	
+
+		// find user
+		model.User.findOne({ username: req.body.email }, function (err, user) {
+
+			if (err) { return next(err); }
+			
+			// check to see if user exists
+			if(!user) {
+				res.status(400).send('no user found');
+			} else {
+				// generate a random character string
+				var newpwd = func.getRandomString(10, function(err, code){
+					if (err) { return next(err); }
+					user.password = code;
+					console.log(code);
+					user.save(function(err, user){
+						if (err) return next(err);
+						// TODO send email
+						res.status(200).send('password reset successfully');
+					});
+				});
+			}
+		});
+	} else {
+		res.status(400).send('check your request parameters');
+	}
+	
+});
+
+/* GET change password (request change in password)*/
+router.get('/secure/password/change', function(req, res, next){ 
+	
+	// check for required request parameters
+	if(req.body.email){	
+
+		// find user
+		model.User.findOne({ username: req.body.email }, function (err, user) {
+
+			if (err) { return next(err); }
+			
+			// check to see if user exists
+			if(!user) {
+				res.status(400).send('no user found');
+			} else {
+				// generate unique code
+				user.changePassword = func.getRandomString(10, function(err, code){
+					user.save(function(err, user){
+						if (err) return next(err);
+						// TODO send email with code in parameters of link
+						res.status(200).send('password change requested');
+					});
+				});
+			}
+		});
+	} else {
+		res.status(400).send('check your request parameters');
+	}
+	
 });
 
 /* POST change password */
 router.post('/secure/password/change', function(req, res, next){ 
-	// TODO
+	
+	// check for required request parameters
+	if(req.body.email && req.body.password && req.query.code){	
+
+		// find user
+		model.User.findOne({ username: req.body.email }, function (err, user) {
+
+			if (err) { return next(err); }
+			
+			// check to see if user exists
+			if(!user) {
+				res.status(400).send('no user found');
+			} else {
+				if(req.body.code == user.changePassword){
+					user.password = req.body.password;
+					user.changePassword = ""; // reset code
+					user.save(function(err, user){
+						if (err) return next(err);
+						// TODO revoke token used for this request
+						res.status(200).send('password changed successfully');
+					});
+				} else {
+					res.status(400).send('you do not have permission to change the password');
+				}
+			}
+		});
+	} else {
+		res.status(400).send('check your request parameters');
+	}
+	
 });
 
 /* POST upload photo */
@@ -342,14 +432,37 @@ router.get('/secure/connections/recent', function(req, res, next){
 				res.status(400).send('no user found');
 			} else {
 				
-				// send last 10 connections
-				// TODO make unique
-				var history = user.history;
-				if(history.length > 10) {
-					history = history.slice(history.length - 10);
-				}
-				res.status(200).send(history);
-				
+				// query connections where user or buddy matches email, make unique, sort descending by time
+				model.Connection.find({ $or: [{ 'creator' : req.query.email }, { 'buddy' : req.query.email }] }).
+					limit(30).
+					sort({ created: -1 }).
+					exec(function(err, conns){
+						
+						if (err) { return next(err); }
+						
+						// array to hold emails
+						var emails = [];
+						
+						// grab emails from connections
+						for(i = 0; i < conns.length; i++){
+							if(conns[i].creator != req.query.email){
+								emails.push(conns[i].creator);
+							} else {
+								emails.push(conns[i].buddy);
+							}
+						}
+						
+						// select unique email addresses
+						var unq_emails = emails.filter(func.getUniqueIndices);
+							
+						// find matching users
+						model.User.find({ username: { $in: unq_emails } }).
+							select({ name: 1, username: 1, phone: 1, photo: 1 }).
+							exec(function(err, users){
+							if (err) { return next(err); }
+							res.status(200).send({ 'message' : 'success', 'history': users });
+						});					
+					});
 			}
 		});
 		

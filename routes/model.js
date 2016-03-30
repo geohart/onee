@@ -37,8 +37,8 @@ db.once('open', function() {
 	  , braceletId: String
 	  , location: positionSchema
 	  , shareLocation: Number
-	  , history: [String]
 	  , status: Number
+	  , changePassword: String
 	});
 	userSchema.pre('save', function(callback) {
 		
