@@ -14,4 +14,12 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'ONEE' });
 });
 
+router.get('/test', function(req, res){
+	res.status(200).send('get request received');
+}
+
+router.post('/test', function(req, res){
+	res.status(200).send('post request received');
+}
+
 module.exports = router;
