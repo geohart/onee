@@ -2,6 +2,7 @@ var express	= require('express');
 var config		= require('../config');   
 var model		= require('./model');
 var auth        = require('./auth');
+var mail			= require('./mail');
 var func			= require('./functions');
 
 // declare instance of express router
@@ -49,26 +50,75 @@ router.post('/create', function(req, res, next) {
 				// validate user input
 				// TODO
 				
-				// create new account from form information
-				var user = new model.User({
-					  name: 	req.body.name
-					, username: req.body.email
-					, phone:	req.body.phone 
-					, password: req.body.pwd
-					, shareLocation: 1
-					, status: 0
-				});
+				// get validation code
+				func.getRandomString(6, function(err, code){
+					if (err) { return next(err); }
+					
+					// create new account from form information
+					var user = new model.User({
+						  name: 	req.body.name
+						, username: req.body.email
+						, phone:	req.body.phone 
+						, password: req.body.pwd
+						, shareLocation: 1
+						, status: 0
+						, verifyCode: code
+						, verified: 0
+					});
+					
+					user.save(function(err, user){
+						if (err) return next(err);
+						res.status(200).send('new user account created successfully');
+						// send email
+						mail.welcome(req, user.username, user.name, user.verifyCode);
+					});
 				
-				user.save(function(err, user){
-					if (err) return next(err);
-					res.status(200).send('new user account created successfully');
-				});
+				});				
 			}
 		});
 	} else {
 		res.status(400).send('check your request parameters');
 	}
 });
+
+/* GET verify account */
+router.get('/verify', function(req, res, next){
+	
+	// check for required request parameters
+	if(req.query.email && req.query.code){	
+	
+		// check if user address exists
+		model.User.findOne({ username: req.query.email }, function (err, user) {
+
+			if (err) { return next(err); }
+			
+			// check if user already exists, otherwise create new account
+			if(!user) {
+				res.status(400).send('No matching account found. Please try again.');
+			} else {
+				
+				// validate user input
+				// TODO
+				
+				// check if code matches saved code
+				if (req.query.code != user.verifyCode){
+					res.status(400).send('Incorrect verification code. Please try again.');
+				} else {
+					user.verified = 1;
+					user.save(function(err, user){
+						if (err) return next(err);
+						res.status(200).send('Your account has been verified!');
+					});
+				}
+				
+			}
+		});
+	} else {
+		res.status(400).send('check your request parameters');
+	}
+});
+
+
 
 /* POST update to account */
 router.post('/secure/update', function(req, res, next){ 

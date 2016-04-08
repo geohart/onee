@@ -18,35 +18,41 @@ router.post('/authenticate', function(req, res, next) {
 			if (err) throw err;
 
 			if (!user) {
-				res.status(401).json({ success: false, message: 'Authentication failed. User not found.' });
+				res.status(401).json({ success: false, message: 'Authentication failed. User not found.', token:null });
 			} else if (user) {
+				
+				// check if account is validated
+				if(user.verified == 1){
 
-				// check if password matches
-				user.verifyPassword(req.body.password, function(err, isMatch) {
-					if (err) { return next(err); }
-					
-					if (!isMatch) {
-						res.json({ success: false, message: 'Authentication failed. Wrong password.' });
-					} else {
+					// check if password matches
+					user.verifyPassword(req.body.password, function(err, isMatch) {
+						if (err) { return next(err); }
+						
+						if (!isMatch) {
+							res.status(401).json({ success: false, message: 'Authentication failed. Wrong password.', token: null });
+						} else {
 
-						// if user is found and password is right - create a token
-						var token = jwt.sign(user, config.secret, {
-							expiresIn: 86400 // expires in 24 hours
-						});
+							// if user is found and password is right - create a token
+							var token = jwt.sign(user, config.secret, {
+								expiresIn: 86400 // expires in 24 hours
+							});
 
-						// return the information including token as JSON
-						res.json({
-							success: true,
-							message: 'Enjoy your token!',
-							token: token
-						});
-					}
-				});
+							// return the information including token as JSON
+							res.status(200).json({
+								success: true,
+								message: 'Enjoy your token!',
+								token: token
+							});
+						}
+					});
+				} else {
+					res.status(401).json({ success: false, message: 'Authentication failed. Account not verified.', token: null });
+				}
 			}
 		});
 		
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).json({ success: false, message: 'Check your request parameters', token: null });
 	}
 	
 });

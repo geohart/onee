@@ -39,6 +39,8 @@ db.once('open', function() {
 	  , shareLocation: Number
 	  , status: Number
 	  , changePassword: String
+	  , verifyCode: String
+	  , verified: Number
 	});
 	userSchema.pre('save', function(callback) {
 		
