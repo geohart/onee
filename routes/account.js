@@ -11,7 +11,7 @@ var router = express.Router();
 // apply security measures to protected endpoints
 router.use('/secure', auth.checkToken);
 
-/*router.post('/test', function(req, res, next){
+router.post('/test', function(req, res, next){
 	console.log('query:');
 	console.log(req.query);
 	console.log('body:');
@@ -29,7 +29,7 @@ router.get('/test', function(req, res, next){
 
 router.get('/secure/test', function(req, res, next){
 	res.status(200).send('hello!')
-});*/
+});
 
 /* POST create account */
 router.post('/create', function(req, res, next) {

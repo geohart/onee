@@ -18,7 +18,7 @@ router.post('/create', function(req, res, next){
 		// TODO: validate inputs
 		// check to make sure emails do not match
 		if(req.body.email == req.body.buddyemail){
-			res.status(400).send('you cannot create a connection with yourself');
+			res.status(400).send({'message' : 'you cannot create a connection with yourself'});
 		} else {
 		
 			// find requesting user
@@ -27,7 +27,7 @@ router.post('/create', function(req, res, next){
 				
 				// verify requesting user exists
 				if(!user) { 
-					res.status(400).send('requesting user not found');
+					res.status(400).send({'message' : 'requesting user not found'});
 				} else {
 
 					// check if a connection exists for initiating user
@@ -38,7 +38,7 @@ router.post('/create', function(req, res, next){
 							if (err) return next(err);
 
 							if(conn){
-								res.status(400).send('you cannot create a new connection without first closing your existing connection');
+								res.status(400).send({'message' : 'you cannot create a new connection without first closing your existing connection'});
 							} else {
 								
 								// verify that buddy exists
@@ -46,7 +46,7 @@ router.post('/create', function(req, res, next){
 									if (err) return next(err);
 									
 									if(!buddy) {
-										res.status(400).send('the user you wish to connect to does not exist');
+										res.status(400).send({'message' : 'the user you wish to connect to does not exist'});
 									} else {
 										// create a new connection
 										var connection = new model.Connection({
@@ -58,7 +58,7 @@ router.post('/create', function(req, res, next){
 										connection.save(function(err, connection){
 											if (err) return next(err);
 											res.status(200).send({ 
-												  'msg' : 'new connection created successfully'
+												  'message' : 'new connection created successfully'
 												, 'connection' : connection
 											});
 										});
@@ -70,7 +70,7 @@ router.post('/create', function(req, res, next){
 			});
 		}
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -89,7 +89,7 @@ router.get('/check', function(req, res, next){
 			
 			// verify requesting user exists
 			if(!user) { 
-				res.status(400).send('requesting user not found');
+				res.status(400).send({'message' : 'requesting user not found'});
 			} else {
 				
 				// find outstanding request
@@ -97,15 +97,15 @@ router.get('/check', function(req, res, next){
 						if (err) return next(err);
 
 						if(conn){
-							res.status(200).send({'msg' : 'new connection request found', 'connection' : conn });
+							res.status(200).send({'message' : 'new connection request found', 'connection' : conn });
 						} else {
-							res.status(200).send({'msg' : 'no new connection requests found', 'connection' : null });
+							res.status(200).send({'message' : 'no new connection requests found', 'connection' : null });
 						}
 				});
 			}
 		});
 	} else {
-		res.status(400).send('check your query parameters');
+		res.status(400).send({'message' : 'check your query parameters'});
 	}
 });
 
@@ -123,7 +123,7 @@ router.post('/accept', function(req, res, next){
 						
 			// verify requesting user exists
 			if(!user) { 
-				res.status(400).send('requesting user not found');
+				res.status(400).send({'message' : 'requesting user not found'});
 			} else {
 				console.log(req.body.connectionId);
 				// find connection object
@@ -132,7 +132,7 @@ router.post('/accept', function(req, res, next){
 
 					if(!conn){
 						// connection does not exist
-						res.status(400).send('connection does not exist');
+						res.status(400).send({'message' : 'connection does not exist'});
 					} else {
 						// connection exists -- check if the requesting user is the buddy
 						if (conn.buddy == req.body.email){
@@ -140,11 +140,11 @@ router.post('/accept', function(req, res, next){
 							conn.accepted = Date.now();
 							conn.save(function(err, conn){
 								if (err) return next(err);
-								res.status(200).send({'msg' : 'connection accepted', 'connection' : conn });
+								res.status(200).send({'message' : 'connection accepted', 'connection' : conn });
 							});
 						} else {
 							// no -- reject request
-							res.status(400).send('you were not invited to this connection');
+							res.status(400).send({'message' : 'you were not invited to this connection'});
 						}
 					}
 					
@@ -152,7 +152,7 @@ router.post('/accept', function(req, res, next){
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -171,7 +171,7 @@ router.post('/end', function(req, res, next){
 						
 			// verify requesting user exists
 			if(!user) { 
-				res.status(400).send('requesting user not found');
+				res.status(400).send({'message' : 'requesting user not found'});
 			} else {
 			
 				// check if a connection exists for user
@@ -182,19 +182,19 @@ router.post('/end', function(req, res, next){
 						if (err) return next(err);
 
 						if(!conn){
-							res.status(400).send('no connection found');
+							res.status(400).send({'message' : 'no connection found'});
 						} else {
 							
 							conn.ended = Date.now();
 							conn.save(function(err, conn){
-								res.status(200).send('connection ended successfully');
+								res.status(200).send({'message' : 'connection ended successfully'});
 							});
 						}
 				});
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -213,12 +213,12 @@ router.post('/message', function(req, res, next){
 
 			if(!conn){
 				// connection does not exist
-				res.status(400).send('connection does not exist');
+				res.status(400).send({'message' : 'connection does not exist'});
 			} else {
 				
 				// check if passed email matches creator or buddy
 				if (!(conn.creator == req.body.email || conn.buddy == req.body.email)){
-					res.status(400).send('you are not a part of this connection');
+					res.status(400).send({'message' : 'you are not a part of this connection'});
 				} else {
 				
 					// check if user is creator or buddy
@@ -258,7 +258,7 @@ router.post('/message', function(req, res, next){
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -277,11 +277,11 @@ router.get('/buddy/location', function(req, res, next){
 
 			if(!conn){
 				// connection does not exist
-				res.status(400).send('connection does not exist');
+				res.status(400).send({'message' : 'connection does not exist'});
 			} else {
 				// check if passed email matches creator or buddy
 				if (!(conn.creator == req.query.email || conn.buddy == req.query.email)){
-					res.status(400).send('you are not a part of this connection');
+					res.status(400).send({'message' : 'you are not a part of this connection'});
 				} else {
 					if(conn.creator == req.query.email){
 						// look up buddy location
@@ -301,38 +301,111 @@ router.get('/buddy/location', function(req, res, next){
 		});
 		
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
+});
+
+/* GET the connection */
+router.get('/connection', function(req, res, next){
+	
+	// check for required request parameters
+	if(req.query.email){
+		
+		// TODO: validate inputs
+		
+		// find requesting user
+		model.User.findOne({ username: req.query.email }, function (err, user) {
+			if (err) return next(err);
+						
+			// verify requesting user exists
+			if(!user) { 
+				res.status(400).send({'message' : 'requesting user not found'});
+			} else {
+			
+				// check if a connection exists for user
+				model.Connection.
+					findOne({ $or: [ { 'creator' : req.query.email }, { 'buddy' : req.query.email } ]}).
+					where('ended').equals(null).
+					exec(function(err, conn){
+						if (err) return next(err);
+
+						if(!conn){
+							res.status(200).send({
+								'message': 'no connection found',
+								'connection':null,
+							});
+						} else {
+							
+							res.status(200).send({
+								'message': 'connection found',
+								'connection':conn,
+							});
+						}
+				});
+			}
+		});
+	} else {
+		res.status(400).send({'message' : 'check your request parameters'});
+	}
 });
 
 /* GET get updated state of connection */
 router.get('/update', function(req, res, next){
 	
 	// check for required request parameters
-	if(req.query.email && req.query.connectionId){
+	if(req.query.email){
 		
 		// TODO: validate inputs
 		
-		// find connection
-		model.Connection.findOne({ '_id' : req.query.connectionId }, function(err, conn){
+		// find requesting user
+		model.User.findOne({ username: req.query.email }).select({ name: 1, username: 1, phone: 1, photo: 1 }).exec(function (err, user) {
 			if (err) return next(err);
-
-			if(!conn){
-				// connection does not exist
-				res.status(400).send('connection does not exist');
+						
+			// verify requesting user exists
+			if(!user) { 
+				res.status(400).send({'message' : 'requesting user not found'});
 			} else {
-				
-				// check if passed email matches creator or buddy
-				if (!(conn.creator == req.query.email || conn.buddy == req.query.email)){
-					res.status(400).send('you are not a part of this connection');
-				} else {
-					res.status(200).send({'message' : 'success', 'connection' : conn});
-				}
+			
+				// check if a connection exists for user
+				model.Connection.
+					findOne({ $or: [ { 'creator' : req.query.email }, { 'buddy' : req.query.email } ]	}).
+					where('ended').equals(null).
+					exec(function(err, conn){
+						if (err) return next(err);
+
+						if(!conn){
+							res.status(200).send({
+								'message': 'no connection found',
+								'user': user,
+								'connection':null,
+								'buddy':null
+							});
+						} else {
+							
+							// check if requesting user is connection's creator or buddy
+							var email;
+							if(req.query.email == conn.buddy){
+								email = conn.creator;
+							} else {
+								email = conn.buddy;
+							}
+							
+							// get other user
+							model.User.findOne({ username: email }).select({ name: 1, username: 1, phone: 1, photo: 1 }).exec(function (err, buddy) {
+								res.status(200).send({
+									'message': 'connection found',
+									'user': user,
+									'connection':conn,
+									'buddy':buddy
+								});
+							});
+						}
+				});
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
