@@ -16,7 +16,7 @@ router.post('/test', function(req, res, next){
 	console.log(req.query);
 	console.log('body:');
 	console.log(req.body);
-	res.status(200).json(req.user).send('test done');
+	res.status(200).json(req.user).send({'message' : 'test done'});
 });
 
 router.get('/test', function(req, res, next){
@@ -24,11 +24,11 @@ router.get('/test', function(req, res, next){
 	console.log(req.query);
 	console.log('body:');
 	console.log(req.body);
-	res.status(200).send('test done');
+	res.status(200).send({'message' : 'test done'});
 });
 
 router.get('/secure/test', function(req, res, next){
-	res.status(200).send('hello!')
+	res.status(200).send({'message' : 'hello!'})
 });
 
 /* POST create account */
@@ -44,7 +44,7 @@ router.post('/create', function(req, res, next) {
 			
 			// check if user already exists, otherwise create new account
 			if(user) {
-				res.status(400).send('A user with that email address already exists');
+				res.status(400).send({'message' : 'A user with that email address already exists'});
 			} else {
 				
 				// validate user input
@@ -68,7 +68,7 @@ router.post('/create', function(req, res, next) {
 					
 					user.save(function(err, user){
 						if (err) return next(err);
-						res.status(200).send('new user account created successfully');
+						res.status(200).send({'message' : 'new user account created successfully'});
 						// send email
 						mail.welcome(req, user.username, user.name, user.verifyCode);
 					});
@@ -77,7 +77,7 @@ router.post('/create', function(req, res, next) {
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 });
 
@@ -94,7 +94,7 @@ router.get('/verify', function(req, res, next){
 			
 			// check if user already exists, otherwise create new account
 			if(!user) {
-				res.status(400).send('No matching account found. Please try again.');
+				res.status(400).send({'message' : 'No matching account found. Please try again.'});
 			} else {
 				
 				// validate user input
@@ -102,19 +102,19 @@ router.get('/verify', function(req, res, next){
 				
 				// check if code matches saved code
 				if (req.query.code != user.verifyCode){
-					res.status(400).send('Incorrect verification code. Please try again.');
+					res.status(400).send({'message' : 'Incorrect verification code. Please try again.'});
 				} else {
 					user.verified = 1;
 					user.save(function(err, user){
 						if (err) return next(err);
-						res.status(200).send('Your account has been verified!');
+						res.status(200).send({'message' : 'Your account has been verified!'});
 					});
 				}
 				
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 });
 
@@ -133,7 +133,7 @@ router.post('/secure/update', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				
 				// validate user input
@@ -162,12 +162,12 @@ router.post('/secure/update', function(req, res, next){
 
 				user.save(function(err, user){
 					if (err) return next(err);
-					res.status(200).send('user account updated successfully');
+					res.status(200).send({'message' : 'user account updated successfully'});
 				});
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 });
 
@@ -183,7 +183,7 @@ router.post('/secure/delete', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				// end open connection if one exists
 				model.Connection.
@@ -198,18 +198,18 @@ router.post('/secure/delete', function(req, res, next){
 								if (err) return next(err);
 								// delete user account
 								user.remove();
-								res.status(200).send('user account deleted successfully');
+								res.status(200).send({'message' : 'user account deleted successfully'});
 							});
 						} else {
 							// delete user account
 							user.remove();
-							res.status(200).send('user account deleted successfully');
+							res.status(200).send({'message' : 'user account deleted successfully'});
 						}
 				});
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}	
 });
 
@@ -226,7 +226,7 @@ router.post('/password/reset', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				// generate a random character string
 				var newpwd = func.getRandomString(10, function(err, code){
@@ -236,13 +236,13 @@ router.post('/password/reset', function(req, res, next){
 					user.save(function(err, user){
 						if (err) return next(err);
 						// TODO send email
-						res.status(200).send('password reset successfully');
+						res.status(200).send({'message' : 'password reset successfully'});
 					});
 				});
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -260,20 +260,20 @@ router.get('/secure/password/change', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				// generate unique code
 				user.changePassword = func.getRandomString(10, function(err, code){
 					user.save(function(err, user){
 						if (err) return next(err);
 						// TODO send email with code in parameters of link
-						res.status(200).send('password change requested');
+						res.status(200).send({'message' : 'password change requested'});
 					});
 				});
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -291,7 +291,7 @@ router.post('/secure/password/change', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				if(req.body.code == user.changePassword){
 					user.password = req.body.password;
@@ -299,15 +299,15 @@ router.post('/secure/password/change', function(req, res, next){
 					user.save(function(err, user){
 						if (err) return next(err);
 						// TODO revoke token used for this request
-						res.status(200).send('password changed successfully');
+						res.status(200).send({'message' : 'password changed successfully'});
 					});
 				} else {
-					res.status(400).send('you do not have permission to change the password');
+					res.status(400).send({'message' : 'you do not have permission to change the password'});
 				}
 			}
 		});
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -337,20 +337,20 @@ router.post('/secure/onee/pair', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				
 				user.braceletId = req.body.braceletId;
 				
 				user.save(function(err, user){
 					if (err) return next(err);
-					res.status(200).send('ONEE paired successfully');
+					res.status(200).send({'message' : 'ONEE paired successfully'});
 				});
 			}
 		});
 		
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -370,20 +370,20 @@ router.post('/secure/onee/unpair', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				
 				user.braceletId = null;
 				
 				user.save(function(err, user){
 					if (err) return next(err);
-					res.status(200).send('ONEE unpaired successfully');
+					res.status(200).send({'message' : 'ONEE unpaired successfully'});
 				});
 			}
 		});
 		
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -403,7 +403,7 @@ router.post('/secure/location/sharing', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				
 				if(req.body.shareLocation == '1'){
@@ -414,13 +414,13 @@ router.post('/secure/location/sharing', function(req, res, next){
 				
 				user.save(function(err, user){
 					if (err) return next(err);
-					res.status(200).send('location sharing preference updated successfully');
+					res.status(200).send({'message' : 'location sharing preference updated successfully'});
 				});
 			}
 		});
 		
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -440,7 +440,7 @@ router.post('/secure/location/update', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				
 				// set user position
@@ -453,13 +453,13 @@ router.post('/secure/location/update', function(req, res, next){
 				// save updated user
 				user.save(function(err, user){
 					if (err) return next(err);
-					res.status(200).send('location updated successfully');
+					res.status(200).send({'message' : 'location updated successfully'});
 				});
 			}
 		});
 		
 	} else {
-		res.status(400).send('check your request parameters');
+		res.status(400).send({'message' : 'check your request parameters'});
 	}
 	
 });
@@ -479,7 +479,7 @@ router.get('/secure/connections/recent', function(req, res, next){
 			
 			// check to see if user exists
 			if(!user) {
-				res.status(400).send('no user found');
+				res.status(400).send({'message' : 'no user found'});
 			} else {
 				
 				// query connections where user or buddy matches email, make unique, sort descending by time
@@ -517,7 +517,7 @@ router.get('/secure/connections/recent', function(req, res, next){
 		});
 		
 	} else {
-		res.status(400).send('check your query parameters');
+		res.status(400).send({'message' : 'check your query parameters'});
 	}
 });
 
@@ -541,7 +541,7 @@ router.get('/secure/users/find', function(req, res, next){
 			});
 
 	}else {
-		res.status(400).send('check your query parameters');
+		res.status(400).send({'message' : 'check your query parameters'});
 	}
 });
 
