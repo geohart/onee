@@ -52,7 +52,7 @@ router.post('/authenticate', function(req, res, next) {
 		});
 		
 	} else {
-		res.status(400).json({ success: false, message: 'Check your request parameters', token: null });
+		res.status(400).json({ success: false, message: 'Error. Check your request parameters.', token: null });
 	}
 	
 });
