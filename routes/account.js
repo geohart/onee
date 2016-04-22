@@ -35,7 +35,7 @@ router.get('/secure/test', function(req, res, next){
 router.post('/create', function(req, res, next) {
 	
 	// check for required request parameters
-	if(req.body.email && req.body.name && req.body.phone && req.body.pwd){	
+	if(req.body.email && req.body.name && req.body.phone && req.body.password){	
 	
 		// check if email address already exists
 		model.User.findOne({ username: req.body.email }, function (err, user) {
@@ -59,7 +59,7 @@ router.post('/create', function(req, res, next) {
 						  name: 	req.body.name
 						, username: req.body.email
 						, phone:	req.body.phone 
-						, password: req.body.pwd
+						, password: req.body.password
 						, shareLocation: 1
 						, status: 0
 						, verifyCode: code
