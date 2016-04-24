@@ -29,25 +29,47 @@ router.post('/create', function(req, res, next){
 				if(!user) { 
 					res.status(400).send({'message' : 'Error. Requesting user not found.'});
 				} else {
+					
+					// verify that buddy exists
+					model.User.findOne({ 'username' : req.body.buddyemail }, function(err, buddy){
+						if (err) return next(err);
+						
+						if(!buddy) {
+							res.status(400).send({'message' : 'Error. The user you wish to connect to does not exist.'});
+						} else {
 
-					// check if a connection exists for initiating user
-					model.Connection.
-						findOne({ $or: [ { 'creator' : req.body.email }, { 'buddy' : req.body.email } ]	}).
-						where('ended').equals(null).
-						exec(function(err, conn){
-							if (err) return next(err);
-
-							if(conn){
-								res.status(400).send({'message' : 'Error. You cannot create a new connection without first closing your existing connection.'});
-							} else {
-								
-								// verify that buddy exists
-								model.User.findOne({ 'username' : req.body.buddyemail }, function(err, buddy){
+							// check if a connection exists for initiating user
+							model.Connection.
+								findOne({ $or: [ { 'creator' : req.body.email }, { 'buddy' : req.body.email } ]	}).
+								where('ended').equals(null).
+								exec(function(err, conn){
 									if (err) return next(err);
-									
-									if(!buddy) {
-										res.status(400).send({'message' : 'Error. The user you wish to connect to does not exist.'});
+
+									if(conn){
+										
+										// end existing connection
+										conn.ended = Date.now();
+										conn.save(function(err, conn){
+											
+											// create a new connection
+											var connection = new model.Connection({
+												  creator: req.body.email
+												, buddy: req.body.buddyemail
+												, created: Date.now()
+											});
+											
+											connection.save(function(err, connection){
+												if (err) return next(err);
+												res.status(200).send({ 
+													  'message' : 'New connection created successfully.'
+													, 'connection' : connection
+												});
+											});
+										});
+								
 									} else {
+								
+								
 										// create a new connection
 										var connection = new model.Connection({
 											  creator: req.body.email
