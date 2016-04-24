@@ -510,7 +510,7 @@ router.get('/secure/connections/recent', function(req, res, next){
 							select({ name: 1, username: 1, phone: 1, photo: 1 }).
 							exec(function(err, users){
 								if (err) { return next(err); }
-								res.status(200).send({ 'message' : 'Success', 'history': users });
+								res.status(200).send({ 'message' : 'Success', 'results': users });
 							});					
 					});
 			}
