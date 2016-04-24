@@ -118,6 +118,44 @@ router.get('/verify', function(req, res, next){
 	}
 });
 
+/* POST resend verification code */
+router.post('/resend', function(req, res, next){
+	
+	// check for required request parameters
+	if(req.body.email){	
+	
+		// check if user exists
+		model.User.findOne({ username: req.query.email }, function (err, user) {
+
+			if (err) { return next(err); }
+			
+			// check if user already exists, otherwise create new account
+			if(!user) {
+				res.status(400).send({'message' : 'Error. No matching account found. Please try again.'});
+			} else {
+			
+				// get a new code
+				func.getRandomString(6, function(err, code){
+					if (err) { return next(err); }
+					
+					user.verifyCode = code;
+					
+					user.save(function(err, user){
+						if (err) return next(err);
+						res.status(200).send({'message' : 'New verification code assigned.'});
+						// send email
+						mail.newVerify(req, user.username, user.name, user.verifyCode);
+					});
+				});
+			}
+		});
+		
+	} else {
+		res.status(400).send({'message' : 'Error. Check your request parameters.'});
+	}
+});
+
+
 
 
 /* POST update to account */
