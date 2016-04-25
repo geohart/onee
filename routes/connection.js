@@ -441,7 +441,7 @@ router.get('/update', function(req, res, next){
 									'user': user,
 									'connection':null,
 									'requests': conns,
-									'buddy':buddy
+									'buddy':null
 								});
 									
 							}
