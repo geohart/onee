@@ -381,47 +381,71 @@ router.get('/update', function(req, res, next){
 		// TODO: validate inputs
 		
 		// find requesting user
-		model.User.findOne({ username: req.query.email }).select({ name: 1, username: 1, phone: 1, photo: 1 }).exec(function (err, user) {
+		model.User.findOne({ username: req.query.email }).select({ name: 1, username: 1, phone: 1, photo: 1, verified: 1 }).exec(function (err, user) {
 			if (err) return next(err);
 						
 			// verify requesting user exists
 			if(!user) { 
 				res.status(400).send({'message' : 'Error. Requesting user not found.'});
 			} else {
-			
-				// check if a connection exists for user
+				
+				// check for existing connections and connection requests
 				model.Connection.
-					findOne({ $or: [ { 'creator' : req.query.email }, { 'buddy' : req.query.email } ]	}).
+					find({ $or: [ { 'creator' : req.query.email }, { 'buddy' : req.query.email } ]	}).
 					where('ended').equals(null).
-					exec(function(err, conn){
+					exec(function(err, conns){
 						if (err) return next(err);
 
-						if(!conn){
+						if(conns.length == 0){
 							res.status(200).send({
-								'message': 'No connection found.',
+								'message': 'No connection or connection requests found.',
 								'user': user,
-								'connection':null,
-								'buddy':null
+								'connection': null,
+								'requests': null,
+								'buddy': null
 							});
 						} else {
 							
-							// check if requesting user is connection's creator or buddy
-							var email;
-							if(req.query.email == conn.buddy){
-								email = conn.creator;
-							} else {
-								email = conn.buddy;
+							// cycle through connnections and find active one
+							var active;
+							for(i = 0; i < conns.length; i++){
+								if(conns[i].accepted == 1){
+									active = i;
+								}
 							}
 							
-							// get other user
-							model.User.findOne({ username: email }).select({ name: 1, username: 1, phone: 1, photo: 1 }).exec(function (err, buddy) {
+							if(active){
+								
+								// check if requesting user is connection's creator or buddy
+								var email;
+								if(req.query.email == conn.buddy){
+									email = conns[active].creator;
+								} else {
+									email = conns[active].buddy;
+								}
+								
+								// get other user
+								model.User.findOne({ username: email }).select({ name: 1, username: 1, phone: 1, photo: 1 }).exec(function (err, buddy) {
+									res.status(200).send({
+										'message': 'Connection found.',
+										'user': user,
+										'connection':conn,
+										'requests': conns,
+										'buddy':buddy
+									});
+								});
+							} else {
+								
 								res.status(200).send({
-									'message': 'Connection found.',
+									'message': 'No active connections.',
 									'user': user,
-									'connection':conn,
+									'connection':null,
+									'requests': conns,
 									'buddy':buddy
 								});
-							});
+									
+							}
+							
 						}
 				});
 			}
