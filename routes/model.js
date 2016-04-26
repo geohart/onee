@@ -86,6 +86,7 @@ db.once('open', function() {
 	connectionSchema.add({
 		creator: String
 	  , buddy: String
+	  , buddyName: String
 	  , created: Number
 	  , accepted: Number
 	  , ended: Number
