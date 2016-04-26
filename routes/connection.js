@@ -54,6 +54,7 @@ router.post('/create', function(req, res, next){
 											// create a new connection
 											var connection = new model.Connection({
 												  creator: req.body.email
+												, creatorName: user.name
 												, buddy: req.body.buddyemail
 												, buddyName: buddy.name
 												, created: Date.now()
@@ -74,6 +75,7 @@ router.post('/create', function(req, res, next){
 										// create a new connection
 										var connection = new model.Connection({
 											  creator: req.body.email
+											, creatorName: user.name
 											, buddy: req.body.buddyemail
 											, buddyName: buddy.name
 											, created: Date.now()

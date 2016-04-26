@@ -85,6 +85,7 @@ db.once('open', function() {
 	var connectionSchema = new mongoose.Schema();
 	connectionSchema.add({
 		creator: String
+	  , creatorName: String
 	  , buddy: String
 	  , buddyName: String
 	  , created: Number
