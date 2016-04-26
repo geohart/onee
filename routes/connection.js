@@ -410,14 +410,14 @@ router.get('/update', function(req, res, next){
 							// connections exist --> assign active, requested, and requests appropriately
 							
 							// cycle through connnections and find active one
-							var active;
+							var active = -1;
 							for(i = 0; i < conns.length; i++){
 								if(conns[i].accepted == 1){
 									active = i;
 								}
 							}
 							
-							if(active){
+							if(active >= 0){
 								
 								// there is an active connection --> therefore requested is null
 								
@@ -445,15 +445,15 @@ router.get('/update', function(req, res, next){
 								
 								// there is no active connection --> look for connection initiated by user
 								
-								// cycle through connnections and find active one
-								var requested;
+								// cycle through connnections and find one requested by user (there should be at most 1)
+								var requested = -1;
 								for(i = 0; i < conns.length; i++){
-									if(conns[i].creator == req.query.email){
+									if(conns[i].creator == user.username){
 										requested = i;
 									}
 								}
 								
-								if(requested){
+								if(requested >= 0){
 									
 									// user has created a connection request
 									res.status(200).send({
