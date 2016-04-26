@@ -45,7 +45,7 @@ module.exports.resendVerify = function(req, recipient, name, code){
 		to: recipient,
 		subject: 'Your new ONEE verification code',
 		text: 'New verification code',
-		html: 'Hi ' + name + ',<br/><br/>Here\'s your new verification code: ' + code + '. Enter this code when prompted by the ONEE App, or click the link below:<br/><br/><a href="' + req.protocol + '://' + req.get('host') + '/account/verify?email=' + encodeURIComponent(recipient) + '&code=' + code + '">Click here to verify your account.</a>.'
+		html: 'Hi ' + name + ',<br/><br/>Here\'s your new verification code: ' + code + '. Enter this code when prompted by the ONEE App, or click the link below:<br/><br/><a href="' + req.protocol + '://' + req.get('host') + '/account/verify?email=' + encodeURIComponent(recipient) + '&code=' + code + '">Click here to verify your account</a>.'
 	};
 
 	// send message
