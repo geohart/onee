@@ -144,7 +144,7 @@ router.post('/resend', function(req, res, next){
 						if (err) return next(err);
 						res.status(200).send({'message' : 'New verification code sent. Check your email.'});
 						// send email
-						mail.newVerify(req, user.username, user.name, user.verifyCode);
+						mail.resendVerify(req, user.username, user.name, user.verifyCode);
 					});
 				});
 			}
