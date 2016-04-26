@@ -22,7 +22,7 @@ router.post('/authenticate', function(req, res, next) {
 			} else if (user) {
 				
 				// check if account is validated
-				if(user.verified == 1){
+				//if(user.verified == 1){
 
 					// check if password matches
 					user.verifyPassword(req.body.password, function(err, isMatch) {
@@ -45,9 +45,9 @@ router.post('/authenticate', function(req, res, next) {
 							});
 						}
 					});
-				} else {
-					res.status(401).json({ success: false, message: 'Authentication failed. Account not verified.', token: null });
-				}
+				//} else {
+				//	res.status(401).json({ success: false, message: 'Authentication failed. Account not verified.', token: null });
+				//}
 			}
 		});
 		
