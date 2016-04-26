@@ -400,11 +400,14 @@ router.get('/update', function(req, res, next){
 							res.status(200).send({
 								'message': 'No connection or connection requests found.',
 								'user': user,
-								'connection': null,
+								'active': null,
+								'requested': null,
 								'requests': null,
 								'buddy': null
 							});
 						} else {
+							
+							// connections exist --> assign active, requested, and requests appropriately
 							
 							// cycle through connnections and find active one
 							var active;
@@ -415,6 +418,8 @@ router.get('/update', function(req, res, next){
 							}
 							
 							if(active){
+								
+								// there is an active connection --> therefore requested is null
 								
 								// check if requesting user is connection's creator or buddy
 								var email;
@@ -429,23 +434,52 @@ router.get('/update', function(req, res, next){
 									res.status(200).send({
 										'message': 'Connection found.',
 										'user': user,
-										'connection':conns[active],
+										'active':conns[active],
+										'requested': null,
 										'requests': conns,
 										'buddy':buddy
 									});
 								});
+								
 							} else {
 								
-								res.status(200).send({
-									'message': 'No active connections.',
-									'user': user,
-									'connection':null,
-									'requests': conns,
-									'buddy':null
-								});
+								// there is no active connection --> look for connection initiated by user
+								
+								// cycle through connnections and find active one
+								var requested;
+								for(i = 0; i < conns.length; i++){
+									if(conns[i].creator == email){
+										requested = i;
+									}
+								}
+								
+								if(requested){
 									
+									// user has created a connection request
+									res.status(200).send({
+										'message': 'You are waiting for someone to accept your connection.',
+										'user': user,
+										'active':null,
+										'requested':conns[requested],
+										'requests': conns,
+										'buddy':null
+									});
+									
+								} else {
+									
+									// only requests for connections exist
+									res.status(200).send({
+										'message': 'You have connection requests.',
+										'user': user,
+										'active':null,
+										'requested':null,
+										'requests': conns,
+										'buddy':null
+									});
+									
+								}
+								
 							}
-							
 						}
 				});
 			}
