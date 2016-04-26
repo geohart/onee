@@ -125,7 +125,7 @@ router.post('/resend', function(req, res, next){
 	if(req.body.email){	
 	
 		// check if user exists
-		model.User.findOne({ username: req.query.email }, function (err, user) {
+		model.User.findOne({ username: req.body.email }, function (err, user) {
 
 			if (err) { return next(err); }
 			
@@ -142,7 +142,7 @@ router.post('/resend', function(req, res, next){
 					
 					user.save(function(err, user){
 						if (err) return next(err);
-						res.status(200).send({'message' : 'New verification code assigned.'});
+						res.status(200).send({'message' : 'New verification code sent. Check your email.'});
 						// send email
 						mail.newVerify(req, user.username, user.name, user.verifyCode);
 					});
