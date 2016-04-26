@@ -429,7 +429,7 @@ router.get('/update', function(req, res, next){
 									res.status(200).send({
 										'message': 'Connection found.',
 										'user': user,
-										'connection':conn,
+										'connection':conns[active],
 										'requests': conns,
 										'buddy':buddy
 									});
