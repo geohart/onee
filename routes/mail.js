@@ -22,7 +22,7 @@ module.exports.welcome = function(req, recipient, name, code){
 		to: recipient,
 		subject: 'Welcome to ONEE!',
 		text: 'Welcome aboard!',
-		html: 'Hi ' + name + ',<br/><br/>Welcome aboard!<br/><br/><a href="' + req.protocol + '://' + req.get('host') + '/account/verify?email=' + encodeURIComponent(recipient) + '&code=' + code + '">Click here to verify your account.</a>, or enter the following code when prompted by the ONEE App: ' + code + '.'
+		html: 'Hi ' + name + ',<br/><br/>Welcome to ONEE!<br/><br/><a href="' + req.protocol + '://' + req.get('host') + '/account/verify?email=' + encodeURIComponent(recipient) + '&code=' + code + '">Click here to verify your account</a>, or enter the following code when prompted by the ONEE App: ' + code + '.'
 	};
 
 	// send message
