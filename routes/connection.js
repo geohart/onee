@@ -448,7 +448,7 @@ router.get('/update', function(req, res, next){
 								// cycle through connnections and find active one
 								var requested;
 								for(i = 0; i < conns.length; i++){
-									if(conns[i].creator == email){
+									if(conns[i].creator == req.query.email){
 										requested = i;
 									}
 								}
