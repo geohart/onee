@@ -57,7 +57,7 @@ router.post('/create', function(req, res, next) {
 					// create new account from form information
 					var user = new model.User({
 						  name: 	req.body.name
-						, username: req.body.email
+						, username: req.body.email.toLowerCase()
 						, phone:	req.body.phone 
 						, password: req.body.password
 						, shareLocation: 1
