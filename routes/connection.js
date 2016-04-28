@@ -427,7 +427,7 @@ router.get('/update', function(req, res, next){
 								
 								// check if requesting user is connection's creator or buddy
 								var email;
-								if(req.query.email == conn.buddy){
+								if(req.query.email == conns[active].buddy){
 									email = conns[active].creator;
 								} else {
 									email = conns[active].buddy;
