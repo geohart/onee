@@ -416,7 +416,7 @@ router.get('/update', function(req, res, next){
 							// cycle through connnections and find active one
 							var active = -1;
 							for(i = 0; i < conns.length; i++){
-								if(conns[i].accepted == 1){
+								if(conns[i].accepted > 0){
 									active = i;
 								}
 							}
