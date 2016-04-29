@@ -62,10 +62,12 @@ router.post('/create', function(req, res, next){
 											
 											connection.save(function(err, connection){
 												if (err) return next(err);
-												res.status(200).send({ 
-													  'message' : 'New connection created successfully.'
-													, 'connection' : connection
+												
+												getConnectionState(req.body.email, 'New connection created successfully.', function(err, cs){
+													if (err) return next(err);
+													res.status(cs.status).send(cs);
 												});
+												
 											});
 										});
 								
@@ -83,10 +85,12 @@ router.post('/create', function(req, res, next){
 										
 										connection.save(function(err, connection){
 											if (err) return next(err);
-											res.status(200).send({ 
-												  'message' : 'New connection created successfully.'
-												, 'connection' : connection
+											
+											getConnectionState(req.body.email, 'New connection created successfully.', function(err, cs){
+												if (err) return next(err);
+												res.status(cs.status).send(cs);
 											});
+														
 										});
 									}
 								});
@@ -101,7 +105,7 @@ router.post('/create', function(req, res, next){
 	
 });
 
-/* GET connection requests */
+/* GET connection requests 
 router.get('/check', function(req, res, next){
 	
 	// check for required query parameters
@@ -133,7 +137,7 @@ router.get('/check', function(req, res, next){
 	} else {
 		res.status(400).send({'message' : 'Error. Check your query parameters'});
 	}
-});
+});*/
 
 /* POST to respond to a connection request */
 router.post('/accept', function(req, res, next){
@@ -166,7 +170,12 @@ router.post('/accept', function(req, res, next){
 							conn.accepted = Date.now();
 							conn.save(function(err, conn){
 								if (err) return next(err);
-								res.status(200).send({'message' : 'Connection accepted.', 'connection' : conn });
+								
+								getConnectionState(req.body.email, 'Connection accepted.', function(err, cs){
+									if (err) return next(err);
+									res.status(cs.status).send(cs);
+								});
+
 							});
 						} else {
 							// no -- reject request
@@ -213,7 +222,13 @@ router.post('/end', function(req, res, next){
 							
 							conn.ended = Date.now();
 							conn.save(function(err, conn){
-								res.status(200).send({'message' : 'Connection ended successfully.'});
+								if (err) return next(err);
+								
+								getConnectionState(req.body.email, 'Connection ended successfully.', function(err, cs){
+									if (err) return next(err);
+									res.status(cs.status).send(cs);
+								});
+								
 							});
 						}
 				});
@@ -278,10 +293,12 @@ router.post('/message', function(req, res, next){
 								
 					conn.save(function(err, conn){
 						if (err) return next(err);
+						
 						getConnectionState(req.body.email, 'Status updated successfully.', function(err, cs){
 							if (err) return next(err);
 							res.status(cs.status).send(cs);
 						});
+						
 					});
 				}
 			}
@@ -292,7 +309,7 @@ router.post('/message', function(req, res, next){
 	
 });
 
-/* GET buddy location */
+/* GET buddy location 
 router.get('/buddy/location', function(req, res, next){ 
 	
 	// check for required request parameters
@@ -333,9 +350,9 @@ router.get('/buddy/location', function(req, res, next){
 		res.status(400).send({'message' : 'Error. Check your request parameters.'});
 	}
 	
-});
+});*/
 
-/* GET the connection */
+/* GET the connection 
 router.get('/connection', function(req, res, next){
 	
 	// check for required request parameters
@@ -376,7 +393,7 @@ router.get('/connection', function(req, res, next){
 	} else {
 		res.status(400).send({'message' : 'Error. Check your request parameters.'});
 	}
-});
+});*/
 
 /* GET get updated state of connection */
 router.get('/update', function(req, res, next){
@@ -384,13 +401,10 @@ router.get('/update', function(req, res, next){
 	// check for required request parameters
 	if(req.query.email){
 		
-		// get connection state
+		// get connection state and send result
 		getConnectionState(req.query.email, 'Updated state found.', function(err, cs){
 			if (err) return next(err);
-			
-			// send result
 			res.status(cs.status).send(cs);
-			
 		});
 
 	} else {
