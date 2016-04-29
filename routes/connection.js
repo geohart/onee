@@ -278,7 +278,10 @@ router.post('/message', function(req, res, next){
 								
 					conn.save(function(err, conn){
 						if (err) return next(err);
-						res.status(200).send({'message' : 'Status updated successfully.', 'connection' : conn });
+						getConnectionState(req.body.email, 'Status updated successfully.', function(err, cs){
+							if (err) return next(err);
+							res.status(cs.status).send(cs);
+						});
 					});
 				}
 			}
@@ -362,7 +365,6 @@ router.get('/connection', function(req, res, next){
 								'connection':null,
 							});
 						} else {
-							
 							res.status(200).send({
 								'message': 'Connection found.',
 								'connection':conn,
@@ -383,7 +385,7 @@ router.get('/update', function(req, res, next){
 	if(req.query.email){
 		
 		// get connection state
-		getConnectionState(req.query.email, function(err, cs){
+		getConnectionState(req.query.email, 'Updated state found.', function(err, cs){
 			if (err) return next(err);
 			
 			// send result
@@ -397,7 +399,7 @@ router.get('/update', function(req, res, next){
 	
 });
 
-function getConnectionState(userEmail, next){
+function getConnectionState(userEmail, msg, next){
 	
 	// declare result variable
 	var result = {
@@ -479,7 +481,7 @@ function getConnectionState(userEmail, next){
 								
 								result = {
 									'status' : 200,
-									'message' : 'Connection found.',
+									'message' : msg,
 									'user' : user,
 									'active' : conns[active],
 									'requested' : null,
@@ -509,7 +511,7 @@ function getConnectionState(userEmail, next){
 								// user has created a connection request
 								result = {
 									'status' : 200,
-									'message' : 'You are waiting for someone to accept your connection.',
+									'message' : msg,
 									'user' : user,
 									'active' : null,
 									'requested' : conns[requested],
@@ -525,7 +527,7 @@ function getConnectionState(userEmail, next){
 								// only requests for connections exist
 								result = {
 									'status' : 200,
-									'message' : 'You have connection requests.',
+									'message' : msg,
 									'user' : user,
 									'active' : null,
 									'requested' : null,
