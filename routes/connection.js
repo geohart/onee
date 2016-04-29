@@ -382,116 +382,166 @@ router.get('/update', function(req, res, next){
 	// check for required request parameters
 	if(req.query.email){
 		
-		// TODO: validate inputs
-		
-		// find requesting user
-		model.User.findOne({ username: req.query.email }).select({ name: 1, username: 1, phone: 1, photo: 1, verified: 1 }).exec(function (err, user) {
+		// get connection state
+		getConnectionState(req.query.email, function(err, cs){
 			if (err) return next(err);
-						
-			// verify requesting user exists
-			if(!user) { 
-				res.status(400).send({'message' : 'Error. Requesting user not found.'});
-			} else {
-				
-				// check for existing connections and connection requests
-				model.Connection.
-					find({ $or: [ { 'creator' : req.query.email }, { 'buddy' : req.query.email } ]	}).
-					where('ended').equals(null).
-					exec(function(err, conns){
-						if (err) return next(err);
-
-						if(conns.length == 0){
-							res.status(200).send({
-								'message': 'No connection or connection requests found.',
-								'user': user,
-								'active': null,
-								'requested': null,
-								'requests': null,
-								'buddy': null
-							});
-						} else {
-							
-							// connections exist --> assign active, requested, and requests appropriately
-							
-							// cycle through connnections and find active one
-							var active = -1;
-							for(i = 0; i < conns.length; i++){
-								if(conns[i].accepted > 0){
-									active = i;
-								}
-							}
-							
-							if(active >= 0){
-								
-								// there is an active connection --> therefore requested is null
-								
-								// check if requesting user is connection's creator or buddy
-								var email;
-								if(req.query.email == conns[active].buddy){
-									email = conns[active].creator;
-								} else {
-									email = conns[active].buddy;
-								}
-								
-								// get other user
-								model.User.findOne({ username: email }).select({ name: 1, username: 1, phone: 1, photo: 1 }).exec(function (err, buddy) {
-									res.status(200).send({
-										'message': 'Connection found.',
-										'user': user,
-										'active':conns[active],
-										'requested': null,
-										'requests': conns,
-										'buddy':buddy
-									});
-								});
-								
-							} else {
-								
-								// there is no active connection --> look for connection initiated by user
-								
-								// cycle through connnections and find one requested by user (there should be at most 1)
-								var requested = -1;
-								for(i = 0; i < conns.length; i++){
-									if(conns[i].creator == user.username){
-										requested = i;
-									}
-								}
-								
-								if(requested >= 0){
-									
-									// user has created a connection request
-									res.status(200).send({
-										'message': 'You are waiting for someone to accept your connection.',
-										'user': user,
-										'active':null,
-										'requested':conns[requested],
-										'requests': conns,
-										'buddy':null
-									});
-									
-								} else {
-									
-									// only requests for connections exist
-									res.status(200).send({
-										'message': 'You have connection requests.',
-										'user': user,
-										'active':null,
-										'requested':null,
-										'requests': conns,
-										'buddy':null
-									});
-									
-								}
-								
-							}
-						}
-				});
-			}
+			
+			// send result
+			res.status(cs.status).send(cs);
+			
 		});
+
 	} else {
 		res.status(400).send({'message' : 'Error. Check your request parameters.'});
 	}
 	
 });
+
+function getConnectionState(userEmail, next){
+	
+	// declare result variable
+	var result = {
+		'status' : 400,
+		'message' : 'Something wen\'t wrong'
+	};
+	
+	// find requesting user
+	model.User.findOne({ username: userEmail }).select({ name: 1, username: 1, phone: 1, photo: 1, verified: 1 }).exec(function (err, user) {
+		if (err) return next(err, null);
+					
+		// verify requesting user exists
+		if(!user) { 
+		
+			result = {
+				'status' : 400,
+				'message' : 'Error. Requesting user not found.',
+				'user' : user,
+				'active' : null,
+				'requested' : null,
+				'requests ': null,
+				'buddy' : null
+			};
+			
+			// return result
+			return next(null, result);
+			
+		} else {
+			
+			// check for existing connections and connection requests
+			model.Connection.
+				find({ $or: [ { 'creator' : userEmail }, { 'buddy' : userEmail } ]	}).
+				where('ended').equals(null).
+				exec(function(err, conns){
+					if (err) return next(err, null);
+
+					if(conns.length == 0){
+						result = {
+							'status' : 200,
+							'message' : 'No connection or connection requests found.',
+							'user' : user,
+							'active' : null,
+							'requested' : null,
+							'requests ': null,
+							'buddy' : null
+						};
+						
+						// return result
+						return next(null, result);
+						
+					} else {
+						
+						// connections exist --> assign active, requested, and requests appropriately
+						
+						// cycle through connnections and find active one
+						var active = -1;
+						for(i = 0; i < conns.length; i++){
+							if(conns[i].accepted > 0){
+								active = i;
+							}
+						}
+						
+						if(active >= 0){
+							
+							// there is an active connection --> therefore requested is null
+							
+							// check if requesting user is connection's creator or buddy
+							var email;
+							if(userEmail == conns[active].buddy){
+								email = conns[active].creator;
+							} else {
+								email = conns[active].buddy;
+							}
+							
+							// get other user
+							model.User.findOne({ username: email }).select({ name: 1, username: 1, phone: 1, photo: 1 }).exec(function (err, buddy) {
+								
+								if (err) return next(err, null);
+								
+								result = {
+									'status' : 200,
+									'message' : 'Connection found.',
+									'user' : user,
+									'active' : conns[active],
+									'requested' : null,
+									'requests ': conns,
+									'buddy' : buddy
+								};
+								
+								// return result
+								return next(null, result);
+								
+							});
+							
+						} else {
+							
+							// there is no active connection --> look for connection initiated by user
+							
+							// cycle through connnections and find one requested by user (there should be at most 1)
+							var requested = -1;
+							for(i = 0; i < conns.length; i++){
+								if(conns[i].creator == user.username){
+									requested = i;
+								}
+							}
+							
+							if(requested >= 0){
+								
+								// user has created a connection request
+								result = {
+									'status' : 200,
+									'message' : 'You are waiting for someone to accept your connection.',
+									'user' : user,
+									'active' : null,
+									'requested' : conns[requested],
+									'requests ': conns,
+									'buddy' : null
+								};
+								
+								// return result
+								return next(null, result);
+								
+							} else {
+								
+								// only requests for connections exist
+								result = {
+									'status' : 200,
+									'message' : 'You have connection requests.',
+									'user' : user,
+									'active' : null,
+									'requested' : null,
+									'requests ': conns,
+									'buddy' : null
+								};
+								
+								// return result
+								return next(null, result);
+								
+							}
+						}
+					}
+			});
+		}
+	});
+}
 
 module.exports = router;
