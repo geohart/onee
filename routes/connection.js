@@ -267,6 +267,7 @@ router.post('/message', function(req, res, next){
 						if(req.body.message == 'safe'){
 							conn.creator_safe = 1;
 							conn.buddy_inquire = 0; // always reset other_inquire after state change
+							conn.buddy_acknowledge = 0; // always reset other_acknowledge after state change
 						} else if (req.body.message == 'unsafe'){
 							conn.creator_safe = 0;
 							conn.buddy_inquire = 0; // always reset other_inquire after state change
@@ -280,6 +281,7 @@ router.post('/message', function(req, res, next){
 						if(req.body.message == 'safe'){
 							conn.buddy_safe = 1;
 							conn.creator_inquire = 0; // always reset other_inquire after state change
+							conn.creator_acknowledge = 0; // always reset other_acknowledge after state change
 						} else if (req.body.message == 'unsafe'){
 							conn.buddy_safe = 0;
 							conn.creator_inquire = 0; // always reset other_inquire after state change
