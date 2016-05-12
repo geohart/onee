@@ -246,6 +246,8 @@ router.post('/end', function(req, res, next){
 
 /* POST send message */
 router.post('/message', function(req, res, next){ 
+
+	var mytime = Date.now();
 	
 	// check for required request parameters
 	if(req.body.email && req.body.connectionId && req.body.message){
@@ -266,41 +268,46 @@ router.post('/message', function(req, res, next){
 					res.status(400).send({'message' : 'Error. You are not a part of this connection.'});
 				} else {
 				
-					// check if user is creator or buddy
-					if(conn.creator == req.body.email){
-						if(req.body.message == 'safe'){
-							conn.creator_safe = 1;
-							conn.buddy_inquire = 0; // always reset other_inquire after state change
-							conn.buddy_acknowledge = 0; // always reset other_acknowledge after state change
-						} else if (req.body.message == 'unsafe'){
-							conn.creator_safe = 0;
-							conn.buddy_inquire = 0; // always reset other_inquire after state change
-							conn.buddy_acknowledge = 0; // automatically reset other acknowledge status when reporting unsafe
-						} else if (req.body.message == 'inquire'){
-							conn.creator_inquire = 1;
-							conn.creator_acknowledge = 0;
-						} else if (req.body.message == 'acknowledge'){
-							conn.creator_acknowledge = 1;
-							conn.creator_inquire = 0;
+					if(mytime - conn.demodified > 3000){ // hack to deal with hardware problems
+						// check if user is creator or buddy
+						if(conn.creator == req.body.email){
+							if(req.body.message == 'safe'){
+								conn.creator_safe = 1;
+								conn.buddy_inquire = 0; // always reset other_inquire after state change
+								conn.buddy_acknowledge = 0; // always reset other_acknowledge after state change
+							} else if (req.body.message == 'unsafe'){
+								conn.creator_safe = 0;
+								conn.buddy_inquire = 0; // always reset other_inquire after state change
+								conn.buddy_acknowledge = 0; // automatically reset other acknowledge status when reporting unsafe
+							} else if (req.body.message == 'inquire'){
+								conn.creator_inquire = 1;
+								conn.creator_acknowledge = 0;
+							} else if (req.body.message == 'acknowledge'){
+								conn.creator_acknowledge = 1;
+								conn.creator_inquire = 0;
+							}
+						} else {
+							if(req.body.message == 'safe'){
+								conn.buddy_safe = 1;
+								conn.creator_inquire = 0; // always reset other_inquire after state change
+								conn.creator_acknowledge = 0; // always reset other_acknowledge after state change
+							} else if (req.body.message == 'unsafe'){
+								conn.buddy_safe = 0;
+								conn.creator_inquire = 0; // always reset other_inquire after state change
+								conn.creator_acknowledge = 0; // automatically reset other acknowledge status when reporting unsafe
+							} else if (req.body.message == 'inquire'){
+								conn.buddy_inquire = 1;
+								conn.buddy_acknowledge = 0;
+							} else if (req.body.message == 'acknowledge'){
+								conn.buddy_acknowledge = 1;
+								conn.buddy_inquire = 0;
+							}
 						}
-					} else {
-						if(req.body.message == 'safe'){
-							conn.buddy_safe = 1;
-							conn.creator_inquire = 0; // always reset other_inquire after state change
-							conn.creator_acknowledge = 0; // always reset other_acknowledge after state change
-						} else if (req.body.message == 'unsafe'){
-							conn.buddy_safe = 0;
-							conn.creator_inquire = 0; // always reset other_inquire after state change
-							conn.creator_acknowledge = 0; // automatically reset other acknowledge status when reporting unsafe
-						} else if (req.body.message == 'inquire'){
-							conn.buddy_inquire = 1;
-							conn.buddy_acknowledge = 0;
-						} else if (req.body.message == 'acknowledge'){
-							conn.buddy_acknowledge = 1;
-							conn.buddy_inquire = 0;
-						}
-					}
-								
+						
+						conn.demodified = mytime;
+						
+					}	
+					
 					conn.save(function(err, conn){
 						if (err) return next(err);
 						
