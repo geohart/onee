@@ -274,8 +274,10 @@ router.post('/message', function(req, res, next){
 							conn.buddy_acknowledge = 0; // automatically reset other acknowledge status when reporting unsafe
 						} else if (req.body.message == 'inquire'){
 							conn.creator_inquire = 1;
+							conn.creator_acknowledge = 0;
 						} else if (req.body.message == 'acknowledge'){
 							conn.creator_acknowledge = 1;
+							conn.creator_inquire = 0;
 						}
 					} else {
 						if(req.body.message == 'safe'){
@@ -288,8 +290,10 @@ router.post('/message', function(req, res, next){
 							conn.creator_acknowledge = 0; // automatically reset other acknowledge status when reporting unsafe
 						} else if (req.body.message == 'inquire'){
 							conn.buddy_inquire = 1;
+							conn.buddy_acknowledge = 0;
 						} else if (req.body.message == 'acknowledge'){
 							conn.buddy_acknowledge = 1;
+							conn.buddy_inquire = 0;
 						}
 					}
 								
