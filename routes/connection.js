@@ -268,6 +268,10 @@ router.post('/message', function(req, res, next){
 					res.status(400).send({'message' : 'Error. You are not a part of this connection.'});
 				} else {
 				
+					if(conn.demodified == null){
+						conn.demodified = 0;
+					}
+					
 					if(mytime - conn.demodified > 3000){ // hack to deal with hardware problems
 						// check if user is creator or buddy
 						if(conn.creator == req.body.email){
