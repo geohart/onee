@@ -89,7 +89,7 @@ db.once('open', function() {
 	  , buddy: String
 	  , buddyName: String
 	  , created: Number
-	  , accepted: 
+	  , accepted: Number
 	  , demodified: Number
 	  , ended: Number
 	  , creator_safe: Number
