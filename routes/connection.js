@@ -55,8 +55,10 @@ router.post('/create', function(req, res, next){
 											var connection = new model.Connection({
 												  creator: req.body.email
 												, creatorName: user.name
+												, creator_safe: 1
 												, buddy: req.body.buddyemail
 												, buddyName: buddy.name
+												, buddy_safe: 1
 												, created: Date.now()
 											});
 											
@@ -78,8 +80,10 @@ router.post('/create', function(req, res, next){
 										var connection = new model.Connection({
 											  creator: req.body.email
 											, creatorName: user.name
+											, creator_safe: 1
 											, buddy: req.body.buddyemail
 											, buddyName: buddy.name
+											, buddy_safe: 1
 											, created: Date.now()
 										});
 										
