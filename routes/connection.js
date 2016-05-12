@@ -440,7 +440,7 @@ function getConnectionState(userEmail, msg, next){
 				'user' : user,
 				'active' : null,
 				'requested' : null,
-				'requests ': null,
+				'requests': null,
 				'buddy' : null
 			};
 			
@@ -463,7 +463,7 @@ function getConnectionState(userEmail, msg, next){
 							'user' : user,
 							'active' : null,
 							'requested' : null,
-							'requests ': null,
+							'requests': null,
 							'buddy' : null
 						};
 						
@@ -505,7 +505,7 @@ function getConnectionState(userEmail, msg, next){
 									'user' : user,
 									'active' : conns[active],
 									'requested' : null,
-									'requests ': conns,
+									'requests': conns,
 									'buddy' : buddy
 								};
 								
@@ -535,7 +535,7 @@ function getConnectionState(userEmail, msg, next){
 									'user' : user,
 									'active' : null,
 									'requested' : conns[requested],
-									'requests ': conns,
+									'requests': conns,
 									'buddy' : null
 								};
 								
@@ -551,7 +551,7 @@ function getConnectionState(userEmail, msg, next){
 									'user' : user,
 									'active' : null,
 									'requested' : null,
-									'requests ': conns,
+									'requests': conns,
 									'buddy' : null
 								};
 								
