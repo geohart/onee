@@ -178,9 +178,9 @@ router.post('/secure/update', function(req, res, next){
 				// TODO
 				
 				// username/email
-				if(req.body.email){
-					if(user.username != req.body.email){
-						user.username = req.body.email;
+				if(req.body.newemail){
+					if(user.username != req.body.newemail){
+						user.username = req.body.newemail;
 					}
 				}
 				
