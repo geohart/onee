@@ -66,6 +66,21 @@ router.post('/create', function(req, res, next) {
 						, verified: 0
 					});
 					
+					// check if user submitted an alias
+					if(req.body.alias){
+						user.alias = req.body.alias;
+					}
+					
+					// check if user submitted a gender
+					if(req.body.gender){
+						user.gender = req.body.gender;
+					}
+					
+					// check if user submitted a date of birth
+					if(req.body.dob){
+						user.dob = req.body.dob;
+					}				
+					
 					user.save(function(err, user){
 						if (err) return next(err);
 						res.status(200).send({'message' : 'New account created successfully.'});
@@ -156,8 +171,6 @@ router.post('/resend', function(req, res, next){
 });
 
 
-
-
 /* POST update to account */
 router.post('/secure/update', function(req, res, next){ 
 
@@ -195,6 +208,27 @@ router.post('/secure/update', function(req, res, next){
 				if(req.body.phone){
 					if(user.phone != req.body.phone){
 						user.phone = req.body.phone;
+					}
+				}
+				
+				// alias
+				if(req.body.alias){
+					if(user.alias != req.body.alias){
+						user.alias = req.body.alias;
+					}
+				}
+				
+				// gender
+				if(req.body.gender){
+					if(user.gender != req.body.gender){
+						user.gender = req.body.gender;
+					}
+				}
+				
+				// dob
+				if(req.body.dob){
+					if(user.dob != req.body.dob){
+						user.dob = req.body.dob;
 					}
 				}
 
@@ -320,7 +354,7 @@ router.get('/secure/password/change', function(req, res, next){
 router.post('/secure/password/change', function(req, res, next){ 
 	
 	// check for required request parameters
-	if(req.body.email && req.body.password && req.query.code){	
+	if(req.body.email && req.body.password && req.body.code){	
 
 		// find user
 		model.User.findOne({ username: req.body.email }, function (err, user) {
@@ -351,20 +385,68 @@ router.post('/secure/password/change', function(req, res, next){
 });
 
 /* POST upload photo */
-router.post('/secure/photo/upload', function(req, res, next){ 
-	// TODO
+router.post('/secure/photo/change', function(req, res, next){ 
+	
+	// check for required request parameters
+	if(req.body.email && req.body.photourl){
+		
+		// find user
+		model.User.findOne({ username: req.body.email }, function (err, user) {
+
+			if (err) { return next(err); }
+			
+			// check to see if user exists
+			if(!user) {
+				res.status(400).send({'message' : 'Error. Requesting user not found.'});
+			} else {
+				user.photo = req.body.photourl;
+				user.save(function(err, user){
+					if (err) return next(err);
+					res.status(200).send({'message' : 'Photo changed successfully.'});
+				});
+			}
+		});
+			
+	} else {
+		res.status(400).send({'message' : 'Error. Check your request parameters.'});
+	}
+	
 });
 
 /* POST delete photo */
 router.post('/secure/photo/delete', function(req, res, next){ 
-	// TODO
+	
+	// check for required request parameters
+	if(req.body.email){
+		
+		// find user
+		model.User.findOne({ username: req.body.email }, function (err, user) {
+
+			if (err) { return next(err); }
+			
+			// check to see if user exists
+			if(!user) {
+				res.status(400).send({'message' : 'Error. Requesting user not found.'});
+			} else {
+				user.photo = "";
+				user.save(function(err, user){
+					if (err) return next(err);
+					res.status(200).send({'message' : 'Photo deleted.'});
+				});
+			}
+		});
+			
+	} else {
+		res.status(400).send({'message' : 'Error. Check your request parameters.'});
+	}
+	
 });
 
 /* POST pair ONEE with account */
 router.post('/secure/onee/pair', function(req, res, next){
 
 	// check for required request parameters
-	if(req.body.email && req.body.braceletId){	
+	if(req.body.email && req.body.deviceid){	
 	
 		// validate request parameters
 		// TODO
@@ -378,12 +460,28 @@ router.post('/secure/onee/pair', function(req, res, next){
 				res.status(400).send({'message' : 'Error. Requesting user not found.'});
 			} else {
 				
-				user.braceletId = req.body.braceletId;
+				// check if bracelet already associated with user
+				if(user.devices != null && user.devices.length > 0){
+					for(i=0; i < user.devices.length; i++){
+						if(user.devices[i].deviceCode == req.body.deviceid){
+							res.status(200).send({'message' : 'ONEE already paired.'});
+						}
+					}
+				} 
 				
+				// otherwise, create a new device object
+				device = new model.Device({
+					deviceCode: req.body.deviceid					
+				});
+				
+				// set bracelet as object in user's collection of bracelet
+				user.devices.push(device);
+				
+				// save user object
 				user.save(function(err, user){
 					if (err) return next(err);
 					res.status(200).send({'message' : 'ONEE paired successfully.'});
-				});
+				});				
 			}
 		});
 		
@@ -393,11 +491,39 @@ router.post('/secure/onee/pair', function(req, res, next){
 	
 });
 
-/* POST unpair ONEE with account */
-router.post('/secure/onee/unpair', function(req, res, next){ 
+/* GET list of paired devices */
+router.get('/secure/onee/devices', function(req, res, next){
 	
 	// check for required request parameters
-	if(req.body.email){	
+	if(req.query.email){
+		
+		// find user
+		model.User.findOne({ username: req.query.email }, function (err, user) {
+			if (err) { return next(err); }
+			
+			// check to see if user exists
+			if(!user) {
+				res.status(400).send({'message' : 'Error. Requesting user not found.'});
+			} else {
+				
+				// return list of devices
+				res.status(200).send({'message' : 'Success', 'results' : user.devices });
+				
+			}
+			
+		});
+			
+	} else {
+		res.status(400).send({'message' : 'Error. Check your request parameters.'});
+	}	
+	
+});
+
+/* POST unpair ONEE with account */
+/*router.post('/secure/onee/unpair', function(req, res, next){ 
+	
+	// check for required request parameters
+	if(req.body.email && req.body.braceletId){	
 	
 		// validate request parameters
 		// TODO
@@ -424,7 +550,7 @@ router.post('/secure/onee/unpair', function(req, res, next){
 		res.status(400).send({'message' : 'Error. Check your request parameters.'});
 	}
 	
-});
+});*/
 
 /* POST location sharing preference */
 router.post('/secure/location/sharing', function(req, res, next){ 
@@ -569,7 +695,7 @@ router.get('/secure/users/find', function(req, res, next){
 		console.log(pattern);
 
 		// search username and name fields
-		model.User.find({ $or: [{ 'username' : {$regex: pattern, $options: 'i'}}, { 'name' : {$regex: pattern, $options: 'i' }}] }).
+		model.User.find({ $or: [{ 'username' : {$regex: pattern, $options: 'i'}}, { 'name' : {$regex: pattern, $options: 'i' }}, { 'alias' : {$regex: pattern, $options: 'i' }}] }).
 			limit(10).
 			sort({ username: 1 }).
 			select({ name: 1, username: 1, phone: 1, photo: 1 }).

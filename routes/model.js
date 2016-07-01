@@ -25,16 +25,26 @@ db.once('open', function() {
 	  , lon: Number
 	});
 	var Position = mongoose.model('position', positionSchema);
+	
+	// device - simply an ID (e.g. a code selected by the manufacturer) for now but may become more complicated in the future
+	var deviceSchema = new mongoose.Schema();
+	deviceSchema.add({
+		deviceCode: String
+	});
+	var Device = mongoose.model('device', deviceSchema);
   
 	// user
 	var userSchema = new mongoose.Schema();
 	userSchema.add({
 	    username: String
 	  , password: String
+	  , alias: String
 	  , name: String
 	  , phone: String
+	  , gender: String
+	  , dob: Number
 	  , photo: String
-	  , braceletId: String
+	  , devices: [deviceSchema]
 	  , location: positionSchema
 	  , shareLocation: Number
 	  , status: Number
@@ -106,6 +116,7 @@ db.once('open', function() {
 	exports.Connection = Connection;
 	exports.Message = Message;
 	exports.Position = Position;
+	exports.Device = Device;
 
 });
 
