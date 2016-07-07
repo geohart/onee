@@ -48,7 +48,7 @@ db.once('open', function() {
 	  , location: positionSchema
 	  , shareLocation: Number
 	  , status: Number
-	  , changePassword: String
+	  , changePassword: Number
 	  , verifyCode: String
 	  , verified: Number
 	});

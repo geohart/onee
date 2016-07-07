@@ -285,14 +285,14 @@ router.post('/secure/delete', function(req, res, next){
 	}	
 });
 
-/* POST reset password */
-router.post('/password/reset', function(req, res, next){
+/* GET reset password */
+router.get('/password/reset', function(req, res, next){
 
 	// check for required request parameters
-	if(req.body.email){	
+	if(req.query.email){	
 
 		// find user
-		model.User.findOne({ username: req.body.email }, function (err, user) {
+		model.User.findOne({ username: req.query.email }, function (err, user) {
 
 			if (err) { return next(err); }
 			
@@ -304,11 +304,11 @@ router.post('/password/reset', function(req, res, next){
 				var newpwd = func.getRandomString(10, function(err, code){
 					if (err) { return next(err); }
 					user.password = code;
-					console.log(code);
+					user.changePassword = 1;
 					user.save(function(err, user){
 						if (err) return next(err);
-						// TODO send email
 						res.status(200).send({'message' : 'Password reset successfully.'});
+						mail.resetPassword(req, user.username, user.name, code);
 					});
 				});
 			}
@@ -319,42 +319,11 @@ router.post('/password/reset', function(req, res, next){
 	
 });
 
-/* GET change password (request change in password)*/
-router.get('/secure/password/change', function(req, res, next){ 
+/* POST set password */
+router.post('/secure/password/set', function(req, res, next){ 
 	
 	// check for required request parameters
-	if(req.body.email){	
-
-		// find user
-		model.User.findOne({ username: req.body.email }, function (err, user) {
-
-			if (err) { return next(err); }
-			
-			// check to see if user exists
-			if(!user) {
-				res.status(400).send({'message' : 'Error. Error. Requesting user not found..'});
-			} else {
-				// generate unique code
-				user.changePassword = func.getRandomString(10, function(err, code){
-					user.save(function(err, user){
-						if (err) return next(err);
-						// TODO send email with code in parameters of link
-						res.status(200).send({'message' : 'Password change requested.'});
-					});
-				});
-			}
-		});
-	} else {
-		res.status(400).send({'message' : 'Error. Check your request parameters.'});
-	}
-	
-});
-
-/* POST change password */
-router.post('/secure/password/change', function(req, res, next){ 
-	
-	// check for required request parameters
-	if(req.body.email && req.body.password && req.body.code){	
+	if(req.body.email && req.body.password){	
 
 		// find user
 		model.User.findOne({ username: req.body.email }, function (err, user) {
@@ -365,17 +334,14 @@ router.post('/secure/password/change', function(req, res, next){
 			if(!user) {
 				res.status(400).send({'message' : 'Error. Requesting user not found.'});
 			} else {
-				if(req.body.code == user.changePassword){
-					user.password = req.body.password;
-					user.changePassword = ""; // reset code
-					user.save(function(err, user){
-						if (err) return next(err);
-						// TODO revoke token used for this request
-						res.status(200).send({'message' : 'Password changed successfully.'});
-					});
-				} else {
-					res.status(400).send({'message' : 'Error. You do not have permission to change the password.'});
-				}
+				user.password = req.body.password;
+				user.changePassword = 0;
+				user.save(function(err, user){
+					if (err) return next(err);
+					// TODO revoke token used for this request
+					res.status(200).send({'message' : 'Password changed successfully.'});
+					mail.passwordChanged(req, user.username, user.name);
+				});
 			}
 		});
 	} else {

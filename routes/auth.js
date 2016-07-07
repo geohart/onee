@@ -33,7 +33,7 @@ router.post('/authenticate', function(req, res, next) {
 						} else {
 
 							// if user is found and password is right - create a token
-							var token = jwt.sign(user, config.secret, {
+							var token = jwt.sign( { pwd: user.password }, config.secret, {
 								expiresIn: 86400 // expires in 24 hours
 							});
 
@@ -57,11 +57,13 @@ router.post('/authenticate', function(req, res, next) {
 	
 });
 
+
 // function to check for token
 router.checkToken = function(req, res, next) {
 
-	// check header or url parameters or post parameters for token
+	// check header or url parameters or post parameters for token and email
 	var token = req.body.token || req.query.token || req.headers['x-access-token'];
+	var email = req.body.email || req.query.email;
 
 	// decode token
 	if (token) {
@@ -70,9 +72,22 @@ router.checkToken = function(req, res, next) {
 			if (err) {
 				return res.json({ success: false, message: 'Failed to authenticate token.' });    
 			} else {
-				// if everything is good, save to request for use in other routes
-				req.decoded = decoded;    
-				next();
+				// token is valid - now check for password reset
+				model.User.findOne({ username: email }, function(err, user) {
+					if (err) throw err;
+
+					if (!user) {
+						res.status(401).json({ success: false, message: 'Failed to authenticate token. User not found.' });
+					} else if (user) {
+						// compare hashed password to token signature
+						if (user.password != decoded.pwd){
+							return res.json({ success: false, message: 'Failed to authenticate token. Password changed since issue.' });
+						} else {
+							// everything is good
+							next();
+						}
+					}
+				});
 			}
 		});
 	} else {
